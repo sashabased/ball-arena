@@ -421,11 +421,7 @@ class AbilityPreviewManager {
                 // 2. Наш шар наносит урон и вызывает способность
                 this.ball.onHitEnemy(this.dummy, this.ball.baseDamage, hitPos, this.particles);
 
-                // 3. Встречный проверочный урон от манекена (7 HP)
-                const dummyDmg = 7;
-                this.ball.takeDamage(dummyDmg, this.particles, false, this.dummy);
-
-                // 4. Обновление статусной строки
+                // 3. Обновление статусной строки
                 this.onAbilityHitTriggered();
             }
         }

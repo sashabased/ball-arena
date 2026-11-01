@@ -1139,7 +1139,11 @@ class ParticleSystem {
             if (isTick) ds.tickTimer = 0;
 
             for (const target of activeBalls) {
-                if (target && target !== ds.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === ds.owner) continue;
+                    if (target.id === 'vortex') continue;
+                    if (ds.owner && target.isPlayer === ds.owner.isPlayer) continue;
+
                     const dx = ds.x - target.pos.x;
                     const dy = ds.y - target.pos.y;
                     const dist = Math.hypot(dx, dy) || 1;
@@ -1158,9 +1162,9 @@ class ParticleSystem {
                             target.vel.y = (target.vel.y / curSpd) * maxSpd;
                         }
 
-                        // Квантовые тики горизонта событий: -2 HP каждые 0.35с
+                        // Квантовые тики горизонта событий: -3 HP каждые 0.35с (без триггера шипов)
                         if (isTick) {
-                            target.takeDamage(3, this, false, ds.owner);
+                            target.takeDamage(3, this, false, ds.owner, false, false);
                             this.addDamageText(target.pos.x, target.pos.y - 20, '−3', '#c084fc');
                             this.addSparks(target.pos.x, target.pos.y, '#a855f7', 4, 2.5);
                         }
@@ -1177,13 +1181,17 @@ class ParticleSystem {
                 this.addSparks(ds.x, ds.y, '#9333ea', 20, 4.5);
 
                 for (const target of activeBalls) {
-                    if (target && target !== ds.owner && target.hp > 0) {
+                    if (target && target.hp > 0) {
+                        if (target === ds.owner) continue;
+                        if (target.id === 'vortex') continue;
+                        if (ds.owner && target.isPlayer === ds.owner.isPlayer) continue;
+
                         const dx = target.pos.x - ds.x;
                         const dy = target.pos.y - ds.y;
                         const dist = Math.hypot(dx, dy) || 1;
                         if (dist <= ds.radius * 1.25) {
                             const burstDmg = 8;
-                            target.takeDamage(burstDmg, this, true, ds.owner);
+                            target.takeDamage(burstDmg, this, true, ds.owner, false, false);
                             this.addDamageText(target.pos.x, target.pos.y - 30, '-' + burstDmg, '#c084fc', true);
                             // Мощный импульс отбрасывания взрывной волной
                             target.vel.x = (dx / dist) * 7.5;
@@ -1334,10 +1342,11 @@ class ParticleSystem {
             // Коллизия с вражескими шарами
             let hitTarget = false;
             for (const target of activeBalls) {
-                if (target && target !== m.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === m.owner || target.id === 'meteor' || (m.owner && target.isPlayer === m.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - m.x, target.pos.y - m.y);
                     if (dist <= target.radius + m.radius) {
-                        target.takeDamage(5, this, false, m.owner);
+                        target.takeDamage(5, this, false, m.owner, false, false);
                         sounds.playExplosion();
                         this.addSparks(m.x, m.y, '#f97316', 12, 3.5);
                         this.addDamageText(target.pos.x, target.pos.y - 25, '−5', '#f97316', true);
@@ -1366,7 +1375,8 @@ class ParticleSystem {
 
             // Проверка столкновения с вражеским шаром
             for (const target of activeBalls) {
-                if (target && target !== mine.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === mine.owner || target.id === 'boomer' || (mine.owner && target.isPlayer === mine.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - mine.x, target.pos.y - mine.y);
                     if (dist <= target.radius + mine.radius) {
                         shouldDetonate = true;
@@ -1382,11 +1392,12 @@ class ParticleSystem {
             if (shouldDetonate) {
                 // Нанесение 14 урона врагам в радиусе 90px
                 for (const target of activeBalls) {
-                    if (target && target !== mine.owner && target.hp > 0) {
+                    if (target && target.hp > 0) {
+                        if (target === mine.owner || target.id === 'boomer' || (mine.owner && target.isPlayer === mine.owner.isPlayer)) continue;
                         const dist = Math.hypot(target.pos.x - mine.x, target.pos.y - mine.y);
                         if (dist <= target.radius + mine.blastRadius) {
                             const dmg = 15;
-                            target.takeDamage(15, this, true, mine.owner);
+                            target.takeDamage(15, this, true, mine.owner, false, false);
                             this.addDamageText(target.pos.x, target.pos.y - 28, '−15', '#f97316', true);
                             const push = target.pos.clone().sub(new Vector2(mine.x, mine.y)).normalize().scale(5.5);
                             target.vel.add(push);
@@ -1447,7 +1458,8 @@ class ParticleSystem {
             if (isTick) tor.tickTimer = 0;
 
             for (const target of activeBalls) {
-                if (target && target !== tor.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === tor.owner || target.id === 'storm' || (tor.owner && target.isPlayer === tor.owner.isPlayer)) continue;
                     const dx = tor.x - target.pos.x;
                     const dy = tor.y - target.pos.y;
                     const dist = Math.hypot(dx, dy) || 1;
@@ -1465,7 +1477,7 @@ class ParticleSystem {
 
                         // Тиковый урон смерча: 3 DMG каждые 0.25 сек
                         if (isTick) {
-                            target.takeDamage(2, this, false, tor.owner);
+                            target.takeDamage(2, this, false, tor.owner, false, false);
                             this.addDamageText(target.pos.x, target.pos.y - 20, '−2', '#38bdf8');
                             this.addSparks(target.pos.x, target.pos.y, '#38bdf8', 6, 2.5);
                         }
@@ -1537,10 +1549,11 @@ class ParticleSystem {
 
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target !== cs.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === cs.owner || target.id === 'crystal' || (cs.owner && target.isPlayer === cs.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - cs.x, target.pos.y - cs.y);
                     if (dist <= target.radius + cs.radius) {
-                        target.takeDamage(3, this, false, cs.owner);
+                        target.takeDamage(3, this, false, cs.owner, false, false);
                         sounds.playBallHit(1.1);
                         this.addDamageText(target.pos.x, target.pos.y - 25, '−3', '#60a5fa');
                         this.addSparks(cs.x, cs.y, '#93c5fd', 8, 3.0);
@@ -1564,10 +1577,11 @@ class ParticleSystem {
 
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target !== sn.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === sn.owner || target.id === 'spike' || (sn.owner && target.isPlayer === sn.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - sn.x, target.pos.y - sn.y);
                     if (dist <= target.radius + 6) {
-                        target.takeDamage(4, this, false, sn.owner);
+                        target.takeDamage(4, this, false, sn.owner, false, false);
                         sounds.playBallHit(0.9);
                         this.addDamageText(target.pos.x, target.pos.y - 25, '−4', '#f1f5f9');
                         this.addSparks(sn.x, sn.y, '#e2e8f0', 8, 3.0);
@@ -1608,10 +1622,11 @@ class ParticleSystem {
             // Столкновение с врагом -> детонация на 3 урона
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target !== md.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === md.owner || target.id === 'mirage' || (md.owner && target.isPlayer === md.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - md.x, target.pos.y - md.y);
                     if (dist <= target.radius + md.radius) {
-                        target.takeDamage(3, this, false, md.owner);
+                        target.takeDamage(3, this, false, md.owner, false, false);
                         target.slowTimer = 1.2;
                         target.slowFactor = 0.6;
                         if (sounds.playAbility) sounds.playAbility();
@@ -1656,10 +1671,11 @@ class ParticleSystem {
             if (tp.tickTimer >= 0.35) {
                 tp.tickTimer = 0;
                 for (const target of activeBalls) {
-                    if (target && target.hp > 0 && target !== tp.owner) {
+                    if (target && target.hp > 0) {
+                        if (target === tp.owner || target.id === 'toxic' || (tp.owner && target.isPlayer === tp.owner.isPlayer)) continue;
                         const dist = Math.hypot(target.pos.x - tp.x, target.pos.y - tp.y);
                         if (dist <= target.radius + tp.radius) {
-                            target.takeDamage(2, this, false, tp.owner);
+                            target.takeDamage(2, this, false, tp.owner, false, false);
                             target.poisonTimer = Math.max(target.poisonTimer || 0, 1.2);
                             this.addDamageText(target.pos.x, target.pos.y - 20, '−2', '#a3e635');
                             this.addAcidSplash(target.pos.x, target.pos.y);
@@ -1707,10 +1723,11 @@ class ParticleSystem {
             // Коллизия с вражескими шарами
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target.hp > 0 && target !== fb.owner) {
+                if (target && target.hp > 0) {
+                    if (target === fb.owner || target.id === 'blaze' || (fb.owner && target.isPlayer === fb.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - fb.x, target.pos.y - fb.y);
                     if (dist <= target.radius + fb.radius) {
-                        target.takeDamage(fb.damage, this, false, fb.owner);
+                        target.takeDamage(fb.damage, this, false, fb.owner, false, false);
                         this.addSparks(fb.x, fb.y, '#f97316', 10, 3.5);
                         sounds.playExplosion ? sounds.playExplosion() : sounds.playBallHit(1.2);
                         hit = true;
@@ -1735,10 +1752,11 @@ class ParticleSystem {
             if (mp.tickTimer >= 0.3) {
                 mp.tickTimer = 0;
                 for (const target of activeBalls) {
-                    if (target && target.hp > 0 && target.id !== 'blaze') {
+                    if (target && target.hp > 0) {
+                        if (target.id === 'blaze' || (mp.owner && (target === mp.owner || target.isPlayer === mp.owner.isPlayer))) continue;
                         const dist = Math.hypot(target.pos.x - mp.x, target.pos.y - mp.y);
                         if (dist <= target.radius + mp.radius) {
-                            target.takeDamage(1, this, false, null);
+                            target.takeDamage(1, this, false, mp.owner, false, false);
                             this.addDamageText(target.pos.x, target.pos.y - 18, '−1', '#f97316');
                             this.addSparks(mp.x, mp.y, '#ea580c', 3, 2.0);
                         }
@@ -1759,10 +1777,11 @@ class ParticleSystem {
 
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target !== gi.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === gi.owner || target.id === 'frosty' || (gi.owner && target.isPlayer === gi.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - gi.x, target.pos.y - gi.y);
                     if (dist <= target.radius + gi.radius) {
-                        target.takeDamage(5, this, true, gi.owner);
+                        target.takeDamage(5, this, true, gi.owner, false, false);
                         target.frozenTimer = 1.5;
                         sounds.playBallHit ? sounds.playBallHit(1.2) : sounds.playHit();
                         this.addDamageText(target.pos.x, target.pos.y - 25, '−5', '#38bdf8', true);
@@ -1793,10 +1812,11 @@ class ParticleSystem {
             cs.elapsed += dt;
             let hit = false;
             for (const target of activeBalls) {
-                if (target && target !== cs.owner && target.hp > 0) {
+                if (target && target.hp > 0) {
+                    if (target === cs.owner || target.id === 'crystal' || (cs.owner && target.isPlayer === cs.owner.isPlayer)) continue;
                     const dist = Math.hypot(target.pos.x - cs.x, target.pos.y - cs.y);
                     if (dist <= target.radius + cs.radius) {
-                        target.takeDamage(7, this, true, cs.owner);
+                        target.takeDamage(7, this, true, cs.owner, false, false);
                         if (cs.owner) {
                             cs.owner.crystalShieldHp = 5;
                         }

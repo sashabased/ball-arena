@@ -1244,12 +1244,12 @@ class BattleBall {
                     if (this.berserkSwordSweepTrail[i].life <= 0) this.berserkSwordSweepTrail.splice(i, 1);
                 }
 
-                const swordLength = 118; // Увеличенный каноничный клинок Dragon Slayer (118px)
+                const swordLength = 126; // Увеличенный каноничный клинок Dragon Slayer (126px по ТЗ)
 
                 // 3. Взмах мечом Убийца Драконов: КД 1.5 сек.
                 // Срабатывает в зоне поражения ИЛИ по упреждающему расчету сближения (Interception Prediction)!
                 const currentDist = (enemy && enemy.hp > 0) ? Math.hypot(enemy.pos.x - this.pos.x, enemy.pos.y - this.pos.y) : Infinity;
-                const strikeRange = Math.hypot(r * 1.35, swordLength) + (enemy ? enemy.radius : 38) + 16;
+                const strikeRange = Math.hypot(r * 1.35, swordLength) + (enemy ? enemy.radius : 38) + 24;
                 const inRangeNow = currentDist <= strikeRange;
 
                 // Предикт сближения по траектории (Interception Prediction):
@@ -1281,7 +1281,7 @@ class BattleBall {
                         this.berserkSwordTimer += dt;
                         if (this.berserkSwordTimer >= 1.5) {
                             if (inRangeNow || willInterceptSoon) {
-                                // Запуск взмаха!
+                                // Запуск взмаха строго в зоне досягаемости или при сближении!
                                 this.berserkSwordTimer = 0;
                                 this.berserkSwingActive = true;
                                 this.berserkSwingTimer = 0;
@@ -1295,26 +1295,26 @@ class BattleBall {
                     }
                 } else {
                     this.berserkSwingTimer += dt;
-                    const swingDuration = 0.36; // Молниеносный сокрушительный взмах (быстрый замах 0.08с и резкий рубящий разруб 0.18с)
+                    const swingDuration = 0.36; // Быстрый сокрушительный рубящий взмах
                     const p = Math.min(1.0, this.berserkSwingTimer / swingDuration);
 
-                    // Широкий замах мечом по канону (от -2.35 rad далеко за плечом до +1.60 rad впереди)
+                    // Широкий замах мечом по канону (от -2.35 rad далеко за плечом до +1.65 rad впереди)
                     let swingOffset = 0.35;
                     if (p < 0.22) {
-                        // Быстрый замах назад и подъем колоссального меча за плечо (0.35 rad -> -2.35 rad, дуга ~155°)
+                        // Быстрый замах назад и подъем колоссального меча за плечо
                         const t = p / 0.22;
                         const ease = t * t * (3 - 2 * t);
                         swingOffset = 0.35 - ease * 2.70;
                     } else if (p <= 0.72) {
-                        // Сокрушительный рубящий взмах вперед и вниз (-2.35 rad -> +1.60 rad, гигантская дуга ~226°)
+                        // Сокрушительный рубящий взмах вперед и вниз
                         const t = (p - 0.22) / 0.50;
                         const ease = t * t * (3 - 2 * t);
-                        swingOffset = -2.35 + ease * 3.95;
+                        swingOffset = -2.35 + ease * 4.00;
                     } else {
-                        // Плавный возврат в исходную стойку (+1.60 rad -> +0.35 rad)
+                        // Плавный возврат в исходную стойку
                         const t = (p - 0.72) / 0.28;
                         const ease = t * t * (3 - 2 * t);
-                        swingOffset = 1.60 - ease * 1.25;
+                        swingOffset = 1.65 - ease * 1.30;
                     }
 
                     // Рукоять меча вынесена полностью наружу за границу шара (в руках воина)
@@ -1329,7 +1329,7 @@ class BattleBall {
                     const prevOff = (this.berserkPrevSwingOffset !== undefined) ? this.berserkPrevSwingOffset : swingOffset;
 
                     // Во время активной фазы удара генерируем плотный веерный шлейф клинка (4 суб-шага)
-                    if (p >= 0.20 && p <= 0.74) {
+                    if (p >= 0.18 && p <= 0.75) {
                         const subSteps = 4;
                         for (let s = 1; s <= subSteps; s++) {
                             const subT = prevOff + (swingOffset - prevOff) * (s / subSteps);
@@ -1355,7 +1355,7 @@ class BattleBall {
                     const currentTipY = ay + Math.sin(this.berserkAimAngle + swingOffset) * swordLength;
 
                     // Нанесение 10 урона и отхил +3 HP при попадании лезвием по врагу
-                    if (p >= 0.22 && p <= 0.74 && !this.berserkHitThisSwing && enemy && enemy.hp > 0) {
+                    if (p >= 0.18 && p <= 0.78 && !this.berserkHitThisSwing && enemy && enemy.hp > 0) {
                         const dx = currentTipX - ax;
                         const dy = currentTipY - ay;
                         const l2 = dx * dx + dy * dy;
@@ -1364,16 +1364,26 @@ class BattleBall {
                         const closestX = ax + tProj * dx;
                         const closestY = ay + tProj * dy;
                         const distToBlade = Math.hypot(enemy.pos.x - closestX, enemy.pos.y - closestY);
+                        const distToGrip = Math.hypot(enemy.pos.x - ax, enemy.pos.y - ay);
 
                         let hitSweep = false;
-                        if (distToBlade <= enemy.radius + 24) {
+                        if (distToBlade <= enemy.radius + 32) {
                             hitSweep = true;
+                        } else if (distToGrip <= swordLength + enemy.radius + 15) {
+                            // Проверка сектора рассечения
+                            const angToEnemy = Math.atan2(enemy.pos.y - ay, enemy.pos.x - ax);
+                            let relAng = angToEnemy - this.berserkAimAngle;
+                            while (relAng > Math.PI) relAng -= Math.PI * 2;
+                            while (relAng < -Math.PI) relAng += Math.PI * 2;
+                            if (relAng >= -2.45 && relAng <= 1.75) {
+                                hitSweep = true;
+                            }
                         } else if (this.berserkSwordSweepTrail && this.berserkSwordSweepTrail.length > 0) {
-                            for (let i = 0; i < Math.min(8, this.berserkSwordSweepTrail.length); i++) {
+                            for (let i = 0; i < Math.min(12, this.berserkSwordSweepTrail.length); i++) {
                                 const pt = this.berserkSwordSweepTrail[i];
                                 const dTip = Math.hypot(enemy.pos.x - pt.tipX, enemy.pos.y - pt.tipY);
                                 const dMid = Math.hypot(enemy.pos.x - pt.midX, enemy.pos.y - pt.midY);
-                                if (dTip <= enemy.radius + 20 || dMid <= enemy.radius + 16) {
+                                if (dTip <= enemy.radius + 28 || dMid <= enemy.radius + 22) {
                                     hitSweep = true;
                                     break;
                                 }
@@ -1382,9 +1392,9 @@ class BattleBall {
 
                         if (hitSweep) {
                             this.berserkHitThisSwing = true;
-                            enemy.takeDamage(10, particles, false, this);
+                            enemy.takeDamage(10, particles, false, this, false, true);
 
-                            // Вампиризм: +3 HP за удар
+                            // Вампиризм: +3 HP за каждый успешный удар Dragon Slayer!
                             const heal = 3;
                             const oldHp = this.hp;
                             this.hp = Math.min(this.maxHp, this.hp + heal);
@@ -2050,7 +2060,7 @@ class BattleBall {
 
         // Нанесение урона
         if (damage > 0) {
-            enemy.takeDamage(damage, particles, isCrit, this);
+            enemy.takeDamage(damage, particles, isCrit, this, false, true);
         }
 
         sounds.playBallHit(1.0);
@@ -2059,24 +2069,13 @@ class BattleBall {
         }
     }
 
-    takeDamage(amount, particles, isCrit = false, enemy = null, isReflected = false) {
+    takeDamage(amount, particles, isCrit = false, enemy = null, isReflected = false, isDirect = false) {
         if (this.hp <= 0) return 0;
         let finalDamage = amount;
 
         // Уязвимость от щупалец Кракена (+50% входящего урона)
         if (this.krakenVulnerableTimer > 0) {
             finalDamage = Math.round(finalDamage * 1.5);
-            if (particles) {
-                // text removed
-            }
-        }
-
-        // Уязвимость от щупалец Кракена (+50% входящего урона)
-        if (this.krakenVulnerableTimer > 0) {
-            finalDamage = Math.round(finalDamage * 1.5);
-            if (particles) {
-                // text removed
-            }
         }
 
         // 1. Киборг: Сегментная броня (снижает следующий урон на 40%, макс. 6 ед)
@@ -2085,20 +2084,19 @@ class BattleBall {
             const reduction = Math.min(6, Math.max(1, Math.round(finalDamage * 0.40)));
             finalDamage = Math.max(1, finalDamage - reduction);
             if (particles) {
-                // text removed
                 particles.addSparks(this.pos.x, this.pos.y, '#22d3ee', 8, 3.0);
             }
         }
 
-        // 2. Алмаз / Кристалл: Призматический ответ (кд 1.4 сек, поглощает min(4, 30%) и отражает ровно столько же)
-        if (this.id === 'crystal' && this.crystalCooldown <= 0 && !isReflected && enemy && enemy !== this) {
+        // 2. Алмаз / Кристалл: Призматический ответ (кд 1.4 сек, поглощает min(4, 30%) и отражает только при прямом таране)
+        if (this.id === 'crystal' && this.crystalCooldown <= 0 && !isReflected && isDirect && enemy && enemy !== this && enemy.isPlayer !== this.isPlayer) {
             this.crystalCooldown = 1.4;
             const absorbed = Math.min(4, Math.max(1, Math.round(finalDamage * 0.30)));
             finalDamage = Math.max(1, finalDamage - absorbed);
-            enemy.takeDamage(absorbed, particles, false, this, true);
+            enemy.takeDamage(absorbed, particles, false, this, true, false);
             sounds.playAbility();
             if (particles) {
-                                particles.addDamageText(enemy.pos.x, enemy.pos.y - 30, `-${absorbed}`, '#a855f7');
+                particles.addDamageText(enemy.pos.x, enemy.pos.y - 30, `-${absorbed}`, '#a855f7');
                 particles.addPrismaticReflect(this.pos.x, this.pos.y, enemy.pos.x, enemy.pos.y);
             }
         }
@@ -2132,23 +2130,20 @@ class BattleBall {
             this.crystalShieldHp -= absorbed;
             finalDamage -= absorbed;
             if (particles) {
-                // text removed
                 particles.addSparks(this.pos.x, this.pos.y, '#38bdf8', 8, 3.0);
             }
         }
 
-        // 3. Шип: колющий отпор при получении урона
-        if (this.id === 'spike' && finalDamage > 0 && this.spikeCooldown <= 0 && !isReflected) {
+        // 3. Шип: колющий отпор при получении прямого таранного урона (не от способностей/магии/черных дыр!)
+        if (this.id === 'spike' && finalDamage > 0 && this.spikeCooldown <= 0 && !isReflected && isDirect && enemy && enemy !== this && enemy.isPlayer !== this.isPlayer) {
             this.spikeCooldown = 4.0;
             sounds.playBallHit(0.9);
             if (particles && particles.addSpikeRadialNeedles) {
                 particles.addSpikeRadialNeedles(this.pos.x, this.pos.y, this);
             }
-            if (enemy && enemy !== this) {
-                enemy.takeDamage(4, particles, false, this, true);
-                if (particles) {
-                    particles.addDamageText(enemy.pos.x, enemy.pos.y - 30, '−4', '#f1f5f9');
-                }
+            enemy.takeDamage(4, particles, false, this, true, false);
+            if (particles) {
+                particles.addDamageText(enemy.pos.x, enemy.pos.y - 30, '−4', '#f1f5f9');
             }
         }
 
@@ -2166,13 +2161,13 @@ class BattleBall {
             }
         }
 
-        // 5. Титан: Сейсмический раскол (накопление 12 урона вызывает сейсмо-волну 8 урона + трещины арены)
-        if (this.id === 'titan' && this.titanCooldown <= 0 && !isReflected && enemy && enemy !== this) {
+        // 5. Титан: Сейсмический раскол (накопление 12 урона вызывает сейсмо-волну 8 урона только при прямом таране)
+        if (this.id === 'titan' && this.titanCooldown <= 0 && !isReflected && isDirect && enemy && enemy !== this && enemy.isPlayer !== this.isPlayer) {
             this.titanAccum += finalDamage;
             if (this.titanAccum >= 12) {
                 this.titanAccum = 0;
                 this.titanCooldown = 0.9;
-                enemy.takeDamage(8, particles, true, this, true);
+                enemy.takeDamage(8, particles, true, this, true, false);
                 const push = enemy.pos.clone().sub(this.pos).normalize().scale(7.0);
                 enemy.vel.add(push);
                 enemy.maintainSpeed();
@@ -5366,20 +5361,20 @@ class BattleBall {
             const swingDuration = 0.36; // Быстрый, сокрушительный рубящий взмах
             const p = Math.min(1.0, this.berserkSwingTimer / swingDuration);
             if (p < 0.22) {
-                // Быстрый замах назад и подъем меча за плечо (0.35 rad -> -2.35 rad, дуга ~155°)
+                // Быстрый замах назад и подъем меча за плечо
                 const t = p / 0.22;
                 const ease = t * t * (3 - 2 * t);
                 swingOffset = 0.35 - ease * 2.70;
             } else if (p <= 0.72) {
-                // Сокрушительный рубящий взмах вперед и вниз (-2.35 rad -> +1.60 rad, гигантская дуга ~226°)
+                // Сокрушительный рубящий взмах вперед и вниз
                 const t = (p - 0.22) / 0.50;
                 const ease = t * t * (3 - 2 * t);
-                swingOffset = -2.35 + ease * 3.95;
+                swingOffset = -2.35 + ease * 4.00;
             } else {
-                // Плавный возврат в исходную стойку (+1.60 rad -> +0.35 rad)
+                // Плавный возврат в исходную стойку
                 const t = (p - 0.72) / 0.28;
                 const ease = t * t * (3 - 2 * t);
-                swingOffset = 1.60 - ease * 1.25;
+                swingOffset = 1.65 - ease * 1.30;
             }
         }
 
@@ -5398,9 +5393,9 @@ class BattleBall {
 
         // =================================================================
         // КОЛОССАЛЬНЫЙ МЕЧ УБИЙЦА ДРАКОНОВ (DRAGON SLAYER) — КАНОН РЕФЕРЕНС 3
-        // Увеличенная длина (118px) для максимальной дальности поражения
+        // Увеличенная длина (126px) для максимальной дальности поражения
         // =================================================================
-        const bladeLen = 118;
+        const bladeLen = 126;
         const bladeW = 27;
 
         // 1. Черненые латные рукавицы Берсерка (держат рукоять снаружи шара)
