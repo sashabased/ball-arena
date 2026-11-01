@@ -1,5 +1,22 @@
 // =============================================================================
-// КОНФИГУРАЦИЯ 6 УНИКАЛЬНЫХ КЕЙСОВ С ДЕТАЛЬНЫМ СОДЕРЖИМЫМ И ШАНСАМИ
+// ВСПОМОГАТЕЛЬНЫЙ МЕТОД ГЕНЕРАЦИИ ВЗВЕШЕННОГО ПУЛА С ТОЧНЫМИ ШАНСАМИ ВЫПАДЕНИЯ
+// =============================================================================
+
+function makeWeightedPool(specs) {
+    const pool = [];
+    for (const spec of specs) {
+        const { balls, count } = spec;
+        if (!balls || balls.length === 0 || count <= 0) continue;
+        for (let i = 0; i < count; i++) {
+            pool.push(balls[i % balls.length]);
+        }
+    }
+    return pool;
+}
+
+// =============================================================================
+// КОНФИГУРАЦИЯ 6 УНИКАЛЬНЫХ КЕЙСОВ И 4 ДОНАТ-КЕЙСОВ С ДЕТАЛЬНЫМ СОДЕРЖИМЫМ И ШАНСАМИ
+// (Берсерк строго исключен из всех кейсов; шансы на высокие тиры сбалансированы)
 // =============================================================================
 
 const CASE_CONFIGS = {
@@ -10,13 +27,12 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_iron.svg',
         cost: 80,
         currency: 'coins',
-        oddsText: '70% Common  •  28% Rare  •  2% Epic',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'COMMON'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'COMMON'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'RARE'),
-            BALL_CATALOG.find(b => b.id === 'titan')
-        ]
+        oddsText: '85% Common  •  14% Rare  •  1% Epic',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'COMMON'), count: 85 },
+            { balls: BALL_CATALOG.filter(b => ['blaze', 'frosty', 'toxic', 'magnet', 'ninja', 'cyborg', 'sand'].includes(b.id)), count: 14 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'titan')].filter(Boolean), count: 1 }
+        ])
     },
     combat: {
         id: 'combat',
@@ -25,13 +41,13 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_combat.svg',
         cost: 160,
         currency: 'coins',
-        oddsText: '55% Rare  •  35% Epic  •  10% Legendary',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'RARE'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            BALL_CATALOG.find(b => b.id === 'tesla'),
-            BALL_CATALOG.find(b => b.id === 'dragon')
-        ]
+        oddsText: '48% Common  •  40% Rare  •  10% Epic  •  2% Legendary',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'COMMON'), count: 48 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'RARE'), count: 40 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 10 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'tesla'), BALL_CATALOG.find(b => b.id === 'dragon')].filter(Boolean), count: 2 }
+        ])
     },
     elite: {
         id: 'elite',
@@ -40,12 +56,13 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_elite.svg',
         cost: 320,
         currency: 'coins',
-        oddsText: '50% Epic  •  40% Legendary  •  10% Mythic',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'MYTHIC')
-        ]
+        oddsText: '50% Rare  •  38% Epic  •  10% Legendary  •  2% Mythic',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'RARE'), count: 50 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 38 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'), count: 10 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'vortex'), BALL_CATALOG.find(b => b.id === 'nuke')].filter(Boolean), count: 2 }
+        ])
     },
     trophy: {
         id: 'trophy',
@@ -54,13 +71,13 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_trophy.svg',
         cost: 0,
         currency: 'ad',
-        oddsText: '60% Rare  •  35% Epic  •  5% Legendary',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'RARE'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            BALL_CATALOG.find(b => b.id === 'dragon'),
-            BALL_CATALOG.find(b => b.id === 'tesla')
-        ]
+        oddsText: '60% Common  •  30% Rare  •  9% Epic  •  1% Legendary',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'COMMON'), count: 60 },
+            { balls: BALL_CATALOG.filter(b => ['blaze', 'frosty', 'vampire', 'toxic', 'ninja', 'sand'].includes(b.id)), count: 30 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'titan'), BALL_CATALOG.find(b => b.id === 'boomer'), BALL_CATALOG.find(b => b.id === 'crystal')].filter(Boolean), count: 9 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'tesla')].filter(Boolean), count: 1 }
+        ])
     },
     royal: {
         id: 'royal',
@@ -69,13 +86,13 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_royal.svg',
         cost: 30,
         currency: 'gems',
-        oddsText: '45% Epic  •  45% Legendary  •  10% Mythic',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'MYTHIC')
-        ]
+        oddsText: '50% Rare  •  35% Epic  •  12% Legendary  •  3% Mythic',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'RARE'), count: 50 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 35 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'), count: 12 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'), count: 3 }
+        ])
     },
     mythic: {
         id: 'mythic',
@@ -84,12 +101,12 @@ const CASE_CONFIGS = {
         img: 'assets/icons/case_mythic.svg',
         cost: 60,
         currency: 'gems',
-        oddsText: '50% Legendary  •  48% Mythic  •  2% Transcendent',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'TRANSCENDENT')
-        ]
+        oddsText: '55% Epic  •  38% Legendary  •  7% Mythic',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 55 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'), count: 38 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'), count: 7 }
+        ])
     },
     void_black: {
         id: 'void_black',
@@ -101,16 +118,12 @@ const CASE_CONFIGS = {
         costGems: 90,
         costYan: 149,
         isDonate: true,
-        oddsText: '50% Legendary  •  45% Mythic  •  5% Transcendent',
-        pool: [
-            BALL_CATALOG.find(b => b.id === 'kraken') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'phantom') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'dragon') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'meteor') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'nuke') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'zeus') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'berserk') || BALL_CATALOG[0]
-        ]
+        oddsText: '45% Epic  •  45% Legendary  •  10% Mythic',
+        pool: makeWeightedPool([
+            { balls: [BALL_CATALOG.find(b => b.id === 'meteor'), BALL_CATALOG.find(b => b.id === 'mirage'), BALL_CATALOG.find(b => b.id === 'crystal')].filter(Boolean), count: 45 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'), count: 45 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'), count: 10 }
+        ])
     },
     cyber: {
         id: 'cyber',
@@ -123,14 +136,12 @@ const CASE_CONFIGS = {
         costYan: 99,
         bonusCoins: 500,
         isDonate: true,
-        oddsText: '100% High-Tech  •  +500 Монет',
-        pool: [
-            BALL_CATALOG.find(b => b.id === 'cyber') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'laser') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'tesla') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'cyborg') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'clockwork') || BALL_CATALOG[0]
-        ]
+        oddsText: '40% Common  •  40% Rare  •  20% Legendary',
+        pool: makeWeightedPool([
+            { balls: [BALL_CATALOG.find(b => b.id === 'cyber'), BALL_CATALOG.find(b => b.id === 'clockwork')].filter(Boolean), count: 40 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'laser'), BALL_CATALOG.find(b => b.id === 'cyborg')].filter(Boolean), count: 40 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'tesla')].filter(Boolean), count: 20 }
+        ])
     },
     dragon: {
         id: 'dragon',
@@ -144,13 +155,13 @@ const CASE_CONFIGS = {
         bonusCoins: 1000,
         bonusGems: 50,
         isDonate: true,
-        oddsText: 'Огонь и Молния  •  +1,000 Монет  •  50 💎 Кешбэк',
-        pool: [
-            BALL_CATALOG.find(b => b.id === 'dragon') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'meteor') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'blaze') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'zeus') || BALL_CATALOG[0]
-        ]
+        oddsText: '45% Rare  •  35% Epic  •  15% Legendary  •  5% Mythic',
+        pool: makeWeightedPool([
+            { balls: [BALL_CATALOG.find(b => b.id === 'blaze')].filter(Boolean), count: 45 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'meteor')].filter(Boolean), count: 35 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'dragon')].filter(Boolean), count: 15 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'zeus')].filter(Boolean), count: 5 }
+        ])
     },
     jackpot: {
         id: 'jackpot',
@@ -162,18 +173,13 @@ const CASE_CONFIGS = {
         costGems: 30,
         costYan: 49,
         isDonate: true,
-        oddsText: 'Шанс на 10,000 🪙, 1,000 💎 или топ-шар',
-        pool: [
-            BALL_CATALOG.find(b => b.id === 'nuke') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'zeus') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'kraken') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'phantom') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'dragon') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'tesla') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'ninja') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'titan') || BALL_CATALOG[0],
-            BALL_CATALOG.find(b => b.id === 'vortex') || BALL_CATALOG[0]
-        ]
+        oddsText: '35% Rare  •  35% Epic  •  22% Legendary  •  8% Mythic',
+        pool: makeWeightedPool([
+            { balls: [BALL_CATALOG.find(b => b.id === 'ninja'), BALL_CATALOG.find(b => b.id === 'sand'), BALL_CATALOG.find(b => b.id === 'wisp'), BALL_CATALOG.find(b => b.id === 'laser')].filter(Boolean), count: 35 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'titan'), BALL_CATALOG.find(b => b.id === 'boomer'), BALL_CATALOG.find(b => b.id === 'storm')].filter(Boolean), count: 35 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'dragon'), BALL_CATALOG.find(b => b.id === 'phantom'), BALL_CATALOG.find(b => b.id === 'kraken'), BALL_CATALOG.find(b => b.id === 'solar')].filter(Boolean), count: 22 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'), count: 8 }
+        ])
     }
 };
 
@@ -189,10 +195,11 @@ const SPHERE_TIERS = {
         cost: 120,
         currency: 'coins',
         img: 'assets/icons/orb_mystery.svg',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'COMMON'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'RARE')
-        ]
+        oddsText: '85% Common  •  15% Rare',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'COMMON'), count: 85 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'RARE'), count: 15 }
+        ])
     },
     titan: {
         id: 'titan',
@@ -201,11 +208,12 @@ const SPHERE_TIERS = {
         cost: 280,
         currency: 'coins',
         img: 'assets/icons/orb_titan.svg',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'RARE'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            BALL_CATALOG.find(b => b.id === 'dragon')
-        ]
+        oddsText: '65% Rare  •  30% Epic  •  5% Legendary',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'RARE'), count: 65 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 30 },
+            { balls: [BALL_CATALOG.find(b => b.id === 'dragon'), BALL_CATALOG.find(b => b.id === 'tesla')].filter(Boolean), count: 5 }
+        ])
     },
     void: {
         id: 'void',
@@ -214,11 +222,12 @@ const SPHERE_TIERS = {
         cost: 35,
         currency: 'gems',
         img: 'assets/icons/orb_void.svg',
-        pool: [
-            ...BALL_CATALOG.filter(b => b.rarity === 'EPIC'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'),
-            ...BALL_CATALOG.filter(b => b.rarity === 'MYTHIC')
-        ]
+        oddsText: '65% Epic  •  28% Legendary  •  7% Mythic',
+        pool: makeWeightedPool([
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'EPIC'), count: 65 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'LEGENDARY'), count: 28 },
+            { balls: BALL_CATALOG.filter(b => b.rarity === 'MYTHIC'), count: 7 }
+        ])
     }
 };
 
@@ -249,7 +258,7 @@ class Game {
 
         // Коллекция разблокированных шаров
         const savedBalls = localStorage.getItem('unlocked_balls');
-        this.unlockedBallIds = savedBalls ? JSON.parse(savedBalls) : ['blaze', 'spike', 'frosty', 'tesla', 'titan'];
+        this.unlockedBallIds = savedBalls ? JSON.parse(savedBalls).filter(id => id !== 'yinyang') : ['blaze', 'spike', 'frosty', 'tesla', 'titan'];
 
         // Состояние матча
         this.playerHearts = 3;
@@ -2136,15 +2145,16 @@ class Game {
             this.ctx.fillRect(right - barWidth * (bHp / 100), barY, barWidth * (bHp / 100), barHeight);
         }
 
+        const centerX = (left + right) / 2;
+        const centerY = (top + bottom) / 2;
+
+        // Стандартная арена
         this.ctx.fillStyle = '#09090c';
         this.ctx.fillRect(left, top, width, height);
 
         this.ctx.strokeStyle = '#25252b';
         this.ctx.lineWidth = 2;
         this.ctx.strokeRect(left, top, width, height);
-
-        const centerX = (left + right) / 2;
-        const centerY = (top + bottom) / 2;
 
         this.ctx.strokeStyle = '#15151a';
         this.ctx.lineWidth = 1;
@@ -2304,8 +2314,22 @@ class Game {
             }
         }
 
+        if (this.detailBallAnimLoop) {
+            cancelAnimationFrame(this.detailBallAnimLoop);
+            this.detailBallAnimLoop = null;
+        }
+
         if (this.detailBallCanvas) {
             renderBallPreview(this.detailBallCanvas, ball.id, 32);
+            if (ball.rarity === 'TRANSCENDENT') {
+                const animateDetailSheen = () => {
+                    if (!this.modalBallDetail || this.modalBallDetail.classList.contains('hidden')) return;
+                    if (this.selectedDetailBallId !== ball.id) return;
+                    renderBallPreview(this.detailBallCanvas, ball.id, 32);
+                    this.detailBallAnimLoop = requestAnimationFrame(animateDetailSheen);
+                };
+                this.detailBallAnimLoop = requestAnimationFrame(animateDetailSheen);
+            }
         }
 
         // Заполнение характеристик с реальными сбалансированными значениями
@@ -2351,7 +2375,21 @@ class Game {
             if (this.detailLockedActions) this.detailLockedActions.classList.add('hidden');
         } else {
             if (this.detailUnlockedActions) this.detailUnlockedActions.classList.add('hidden');
-            if (this.detailLockedActions) this.detailLockedActions.classList.remove('hidden');
+            if (this.detailLockedActions) {
+                this.detailLockedActions.classList.remove('hidden');
+                const btnGoto = document.getElementById('btn-goto-chests-from-detail');
+                if (btnGoto) {
+                    if (ball.rarity === 'TRANSCENDENT') {
+                        btnGoto.innerHTML = '<span>СПОСОБ ПОЛУЧЕНИЯ СКОРО...</span>';
+                        btnGoto.style.opacity = '0.65';
+                        btnGoto.style.pointerEvents = 'none';
+                    } else {
+                        btnGoto.innerHTML = '<span>ОТКРЫТЬ В СУНДУКАХ / СФЕРАХ &rarr;</span>';
+                        btnGoto.style.opacity = '1';
+                        btnGoto.style.pointerEvents = 'auto';
+                    }
+                }
+            }
         }
 
         this.modalBallDetail.classList.remove('hidden');
@@ -2364,6 +2402,10 @@ class Game {
     }
 
     closeBallDetailModal() {
+        if (this.detailBallAnimLoop) {
+            cancelAnimationFrame(this.detailBallAnimLoop);
+            this.detailBallAnimLoop = null;
+        }
         if (this.abilityPreview) {
             this.abilityPreview.stop();
         }

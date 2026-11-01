@@ -83,14 +83,19 @@ class ParticleSystem {
 
     // 3. Ударная волна (Шоквейв) - для Бомбы, Метеора, Атома
     addShockwave(x, y, color = '#ffffff', maxRadius = 75, duration = 0.35, lineWidth = 4) {
+        if (typeof color === 'number' && typeof maxRadius === 'string') {
+            const tmp = color;
+            color = maxRadius;
+            maxRadius = tmp;
+        }
         this.shockwaves.push({
             x, y,
             radius: 5,
-            maxRadius,
-            color,
-            duration,
+            maxRadius: typeof maxRadius === 'number' ? maxRadius : 75,
+            color: typeof color === 'string' ? color : '#ffffff',
+            duration: typeof duration === 'number' ? duration : 0.35,
             elapsed: 0,
-            lineWidth
+            lineWidth: typeof lineWidth === 'number' ? lineWidth : 4
         });
     }
 
@@ -265,6 +270,10 @@ class ParticleSystem {
     }
 
     // 12. Кровотечение (Мясник / Пила) - только темно-красные капли и брызги
+    addBlood(x, y, count = 8) {
+        this.addBleedSplatter(x, y, count);
+    }
+
     addBleedSplatter(x, y, count = 12) {
         for (let i = 0; i < count; i++) {
             const angle = Math.random() * Math.PI * 2;

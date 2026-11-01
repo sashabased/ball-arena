@@ -4,3 +4,43 @@ Thumbs.db
 *.log
 .vscode/
 .idea/
+
+# Python & temporary agent scripts
+*.py
+__pycache__/
+.edge_*/
+
+# Temporary analysis, dumps and scratch files
+balls_*.js
+particles_found_*.txt
+extracted_*
+step_*
+check_*
+temp_*
+build_*
+trace_*
+inspect_*
+parse_*
+analyze_*
+apply_*
+replace_*
+restored_*
+fix_*
+revert_*
+line_*
+catalog_balanced.js
+logic_balanced.js
+drawings_tmp.js
+original_particles_*.js
+capture_*.js
+patch_*.js
+test_*.js
+verify_*.js
+preview_gallery.html
+draw_section_*.txt
+extract_base_preview.js
+js/preview_clean_base.js
+
+# Root screenshots (keep assets/*.png intact)
+*.png
+!assets/**/*.png
