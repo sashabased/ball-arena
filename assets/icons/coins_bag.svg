@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="pouchGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#9a3412"/>
+      <stop offset="60%" stop-color="#7c2d12"/>
+      <stop offset="100%" stop-color="#431407"/>
+    </linearGradient>
+    <linearGradient id="coinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#a16207"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Тело кожаного мешочка -->
+  <path d="M30 52 C20 80, 25 106, 60 106 C95 106, 100 80, 90 52 C84 46, 75 48, 60 48 C45 48, 36 46, 30 52 Z" fill="url(#pouchGrad)" stroke="#1c1917" stroke-width="2"/>
+
+  <!-- Горловина мешка -->
+  <path d="M42 46 L36 32 L48 36 L60 30 L72 36 L84 32 L78 46 Z" fill="#78350f" stroke="#1c1917" stroke-width="1.5"/>
+  <ellipse cx="60" cy="46" rx="22" ry="5" fill="#292524"/>
+
+  <!-- Золотой шнурок -->
+  <rect x="42" y="44" width="36" height="4" rx="2" fill="url(#coinGrad)"/>
+
+  <!-- Горка золотых монет с четкими гранями -->
+  <ellipse cx="44" cy="98" rx="14" ry="7" fill="url(#coinGrad)" stroke="#713f12" stroke-width="1.2"/>
+  <ellipse cx="76" cy="98" rx="14" ry="7" fill="url(#coinGrad)" stroke="#713f12" stroke-width="1.2"/>
+  <ellipse cx="60" cy="102" rx="16" ry="8" fill="url(#coinGrad)" stroke="#713f12" stroke-width="1.2"/>
+  <circle cx="60" cy="102" r="4" fill="none" stroke="#713f12" stroke-width="1"/>
+</svg>

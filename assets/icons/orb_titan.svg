@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <!-- Градиент титанового корпуса -->
+    <radialGradient id="titanOrbCore" cx="35%" cy="30%" r="70%">
+      <stop offset="0%" stop-color="#475569"/>
+      <stop offset="45%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </radialGradient>
+    <!-- Металлическое гироскопическое кольцо -->
+    <linearGradient id="titanRing" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#94a3b8"/>
+      <stop offset="50%" stop-color="#334155"/>
+      <stop offset="100%" stop-color="#64748b"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Заднее кольцо 1 (горизонтальное гироскопическое) -->
+  <ellipse cx="60" cy="60" rx="54" ry="18" fill="none" stroke="url(#titanRing)" stroke-width="2.2" transform="rotate(-15 60 60)" opacity="0.45"/>
+  
+  <!-- Заднее кольцо 2 (вертикальное гироскопическое) -->
+  <ellipse cx="60" cy="60" rx="18" ry="54" fill="none" stroke="#38bdf8" stroke-width="1.2" transform="rotate(25 60 60)" opacity="0.4"/>
+
+  <!-- Основная титановая сфера -->
+  <circle cx="60" cy="60" r="38" fill="url(#titanOrbCore)" stroke="#334155" stroke-width="2.2"/>
+  
+  <!-- Внутренние высокотехнологичные пазы -->
+  <circle cx="60" cy="60" r="30" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="8 4" opacity="0.4"/>
+  <circle cx="60" cy="60" r="22" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+
+  <!-- Центральное энергетическое ядро титана -->
+  <circle cx="60" cy="60" r="11" fill="#0f172a" stroke="#38bdf8" stroke-width="1.8"/>
+  <circle cx="60" cy="60" r="5" fill="#38bdf8"/>
+  <circle cx="60" cy="60" r="2" fill="#ffffff"/>
+
+  <!-- Переднее кольцо 1 -->
+  <path d="M 6 60 A 54 18 0 0 0 114 60" fill="none" stroke="url(#titanRing)" stroke-width="2.5" transform="rotate(-15 60 60)"/>
+  
+  <!-- Переднее кольцо 2 -->
+  <path d="M 60 6 A 18 54 0 0 1 60 114" fill="none" stroke="#38bdf8" stroke-width="1.5" transform="rotate(25 60 60)"/>
+</svg>

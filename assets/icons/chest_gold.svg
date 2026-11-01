@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff099"/>
+      <stop offset="40%" stop-color="#f59e0b"/>
+      <stop offset="85%" stop-color="#b45309"/>
+      <stop offset="100%" stop-color="#78350f"/>
+    </linearGradient>
+    <linearGradient id="purpleBody" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2e1065"/>
+      <stop offset="100%" stop-color="#0f0728"/>
+    </linearGradient>
+    <linearGradient id="rubyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff4d4d"/>
+      <stop offset="100%" stop-color="#990000"/>
+    </linearGradient>
+    <filter id="goldGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Корпус сундука -->
+  <rect x="15" y="44" width="90" height="58" rx="8" fill="url(#purpleBody)" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  
+  <!-- Полукруглая золотая крышка -->
+  <path d="M12 44 Q60 12 108 44 Z" fill="url(#purpleBody)" stroke="url(#goldGrad)" stroke-width="2.5"/>
+  <path d="M22 44 Q60 20 98 44 Z" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Золотые угловые накладки -->
+  <path d="M15 44 L30 44 L30 60 L24 60 L24 50 L15 50 Z" fill="url(#goldGrad)"/>
+  <path d="M105 44 L90 44 L90 60 L96 60 L96 50 L105 50 Z" fill="url(#goldGrad)"/>
+  <path d="M15 102 L30 102 L30 86 L24 86 L24 96 L15 96 Z" fill="url(#goldGrad)"/>
+  <path d="M105 102 L90 102 L90 86 L96 86 L96 96 L105 96 Z" fill="url(#goldGrad)"/>
+
+  <!-- Золотой горизонтальный пояс -->
+  <rect x="13" y="42" width="94" height="6" fill="url(#goldGrad)" filter="url(#goldGlow)"/>
+
+  <!-- Роскошный королевский замок с рубином -->
+  <rect x="46" y="36" width="28" height="26" rx="5" fill="url(#goldGrad)" stroke="#fff" stroke-width="1"/>
+  <polygon points="60,40 68,49 60,58 52,49" fill="url(#rubyGrad)" filter="url(#goldGlow)"/>
+</svg>

@@ -1,0 +1,1232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BALL ARENA</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="app-container">
+
+        <!-- =================== ГЛАВНОЕ МЕНЮ =================== -->
+        <div id="screen-menu" class="screen">
+            <header class="menu-header">
+                <div class="user-badge">
+                    <span class="rank-tag">РАНГ I</span>
+                    <span class="user-name">Игрок</span>
+                    <span class="vip-tag hidden" id="menu-vip-tag">VIP 👑</span>
+                </div>
+                <div class="currencies-row">
+                    <div class="currency-pill">
+                        <img src="assets/icons/coins_bag.svg" class="currency-icon-img" alt="Coins">
+                        <span id="menu-coins">150</span>
+                    </div>
+                    <div class="currency-pill">
+                        <img src="assets/icons/gems_pile.svg" class="currency-icon-img" alt="Gems">
+                        <span id="menu-gems">50</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="menu-hero">
+                <div class="brand-title">BALL ARENA</div>
+                <div class="brand-subtitle">ФИЗИЧЕСКИЙ БАТТЛ ШАРОВ</div>
+
+                <div class="hero-ball-display">
+                    <canvas id="heroCanvas" width="130" height="130"></canvas>
+                </div>
+            </div>
+
+            <nav class="menu-nav">
+                <button id="btn-play" class="btn btn-action">
+                    <span>В БОЙ</span>
+                    <span class="btn-arrow">→</span>
+                </button>
+                <button id="btn-sandbox" class="btn btn-sandbox" style="margin-top: 10px; width: 100%; background: linear-gradient(135deg, #4f46e5, #06b6d4); color: #fff; font-weight: 800; border: 1px solid rgba(255,255,255,0.25); border-radius: 14px; padding: 12px 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4); text-transform: uppercase; font-size: 0.95rem; letter-spacing: 0.5px;">
+                    <span>🧪 ТЕСТОВЫЙ БОЙ (ПЕСОЧНИЦА)</span>
+                </button>
+
+                <div class="nav-grid">
+                    <button id="btn-open-chests" class="btn btn-secondary active-action">
+                        <span class="btn-title">СУНДУКИ</span>
+                        <span class="badge badge-accent">ОТКРЫТЬ</span>
+                    </button>
+                    <button id="btn-collection" class="btn btn-secondary active-action">
+                        <span class="btn-title">ИНВЕНТАРЬ</span>
+                        <span id="collection-count-badge" class="badge badge-accent">5/29</span>
+                    </button>
+                    <button id="btn-open-shop" class="btn btn-secondary active-action">
+                        <span class="btn-title">МАГАЗИН</span>
+                        <span class="badge badge-accent">HOT 🔥</span>
+                    </button>
+                    <button class="btn btn-secondary disabled" title="В разработке">
+                        <span class="btn-title">НАСТРОЙКИ</span>
+                        <span class="badge">СКОРО</span>
+                    </button>
+                </div>
+            </nav>
+        </div>
+
+        <!-- =================== ЭКРАН МАТЧА =================== -->
+        <div id="screen-battle" class="screen hidden">
+            <!-- Верхняя панель матча: Сердца и Раунд (Симметрично) -->
+            <div id="battle-header">
+                <div class="player-hud player-left">
+                    <span class="hud-label">ИГРОК</span>
+                    <div class="hearts-list" id="player-hearts">
+                        <span class="heart active"></span>
+                        <span class="heart active"></span>
+                        <span class="heart active"></span>
+                    </div>
+                </div>
+
+                <div id="round-chip">РАУНД <span id="round-num">1</span></div>
+
+                <div class="player-hud player-right">
+                    <span class="hud-label">СОПЕРНИК</span>
+                    <div class="hearts-list" id="bot-hearts">
+                        <span class="heart active"></span>
+                        <span class="heart active"></span>
+                        <span class="heart active"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Холст боевой арены -->
+            <canvas id="gameCanvas"></canvas>
+
+            <!-- Анонс начала раунда (выход шаров) -->
+            <div id="round-intro-banner" class="round-intro-banner hidden">
+                <div class="intro-badge">РАУНД <span id="intro-round-num">1</span></div>
+                <div class="intro-matchup-row">
+                    <div class="intro-fighter player-fighter">
+                        <canvas id="intro-player-canvas" width="64" height="64"></canvas>
+                        <div id="intro-player-name" class="fighter-name">Огненный</div>
+                        <div class="fighter-side-tag">ТВОЙ ШАР</div>
+                    </div>
+                    <div class="intro-vs-col">
+                        <div class="intro-vs-tag">VS</div>
+                    </div>
+                    <div class="intro-fighter bot-fighter">
+                        <canvas id="intro-bot-canvas" width="64" height="64"></canvas>
+                        <div id="intro-bot-name" class="fighter-name">Мороз</div>
+                        <div class="fighter-side-tag">СОПЕРНИК</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Центральный таймер отсчета 5 сек -->
+            <div id="countdown-overlay" class="hidden">
+                <div class="countdown-sub">ВЫБЕРИ НАПРАВЛЕНИЕ ЗАПУСКА</div>
+                <div id="countdown-number">5</div>
+            </div>
+
+            <!-- Оверлей рулетки перед раундом -->
+            <div id="roulette-modal" class="overlay hidden">
+                <div class="roulette-box">
+                    <div id="roulette-modal-label" class="modal-label">РОЛЛ ШАРА НА РАУНД</div>
+                    <div class="roulette-window">
+                        <div class="roulette-marker"></div>
+                        <div id="roulette-track" class="roulette-track"></div>
+                    </div>
+                    <div id="selected-ball-card" class="ball-card-preview hidden">
+                        <canvas id="won-ball-canvas" width="60" height="60" class="ball-preview-canvas"></canvas>
+                        <div class="ball-details">
+                            <div class="ball-header">
+                                <span class="ball-name" id="preview-name">Тесла</span>
+                                <span class="ball-rarity" id="preview-rarity">LEGENDARY</span>
+                            </div>
+                            <div class="ball-desc" id="preview-desc">Способность шара</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Экран завершения матча -->
+            <div id="game-over-modal" class="overlay hidden">
+                <div class="result-box">
+                    <div id="result-badge" class="result-badge">РЕЗУЛЬТАТ</div>
+                    <h1 id="result-title">ПОБЕДА</h1>
+                    <p id="result-subtitle">Все шары соперника уничтожены</p>
+                    <div class="reward-pill">
+                        <span class="reward-label">Награда</span>
+                        <strong id="reward-amount">+150 🪙</strong>
+                    </div>
+                    <div class="result-actions">
+                        <button id="btn-next-match" class="btn btn-action">ПОВТОРИТЬ</button>
+                        <button id="btn-to-menu" class="btn btn-secondary">В МЕНЮ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================== ЭКРАН СУНДУКОВ И ПРИЗОВ =================== -->
+        <div id="screen-chests" class="screen hidden">
+            <header class="menu-header">
+                <button id="btn-chests-back" class="text-back-btn">← НАЗАД</button>
+                <div class="currencies-row">
+                    <div class="currency-pill">
+                        <img src="assets/icons/coins_bag.svg" class="currency-icon-img" alt="Coins">
+                        <span id="chests-coins">150</span>
+                    </div>
+                    <div class="currency-pill">
+                        <img src="assets/icons/gems_pile.svg" class="currency-icon-img" alt="Gems">
+                        <span id="chests-gems">50</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Переключатель вкладок -->
+            <div class="chests-tabs">
+                <button class="tab-btn active" data-tab="tab-cases">КЕЙСЫ</button>
+                <button class="tab-btn" data-tab="tab-spheres">1 ИЗ 3 ШАРОВ</button>
+                <button class="tab-btn" data-tab="tab-bank">БАНК (РЕКЛАМА)</button>
+            </div>
+
+            <div class="chests-scroll-content">
+                <!-- Вкладка 1: Кейсы (Сетка кейсов) -->
+                <div id="tab-cases" class="tab-content active">
+                    <div class="cases-grid">
+
+                        <!-- 1. Железный кейс -->
+                        <div class="case-tile" data-case="iron">
+                            <span class="case-tier-tag">ОБЫЧНЫЙ</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_iron.svg" class="case-preview-img" alt="Железный кейс">
+                            </div>
+                            <h4 class="case-name">Железный Кейс</h4>
+                            <div class="case-odds-preview">
+                                <span>70% Common</span>
+                                <span>28% Rare</span>
+                                <span>2% Epic</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">80 🪙</span>
+                            </button>
+                        </div>
+
+                        <!-- 2. Боевой кейс -->
+                        <div class="case-tile" data-case="combat">
+                            <span class="case-tier-tag">РЕДКИЙ</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_combat.svg" class="case-preview-img" alt="Боевой кейс">
+                            </div>
+                            <h4 class="case-name">Боевой Кейс</h4>
+                            <div class="case-odds-preview">
+                                <span>55% Rare</span>
+                                <span>35% Epic</span>
+                                <span>10% Leg</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">160 🪙</span>
+                            </button>
+                        </div>
+
+                        <!-- 3. Элитный кейс -->
+                        <div class="case-tile" data-case="elite">
+                            <span class="case-tier-tag">ЭПИЧЕСКИЙ</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_elite.svg" class="case-preview-img" alt="Элитный кейс">
+                            </div>
+                            <h4 class="case-name">Элитный Кейс</h4>
+                            <div class="case-odds-preview">
+                                <span>50% Epic</span>
+                                <span>40% Leg</span>
+                                <span>10% Myth</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">320 🪙</span>
+                            </button>
+                        </div>
+
+                        <!-- 4. Трофейный кейс -->
+                        <div class="case-tile" data-case="trophy">
+                            <span class="case-tier-tag">РЕКЛАМА</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_trophy.svg" class="case-preview-img" alt="Трофейный кейс">
+                            </div>
+                            <h4 class="case-name">Трофейный Кейс</h4>
+                            <div class="case-odds-preview">
+                                <span>60% Rare</span>
+                                <span>35% Epic</span>
+                                <span>5% Leg</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">🎬 БЕСПЛАТНО</span>
+                            </button>
+                        </div>
+
+                        <!-- 5. Королевский сундук -->
+                        <div class="case-tile" data-case="royal">
+                            <span class="case-tier-tag">ЛЕГЕНДАРНЫЙ</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_royal.svg" class="case-preview-img" alt="Королевский сундук">
+                            </div>
+                            <h4 class="case-name">Королевский Сундук</h4>
+                            <div class="case-odds-preview">
+                                <span>45% Epic</span>
+                                <span>45% Leg</span>
+                                <span>10% Myth</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">30 💎</span>
+                            </button>
+                        </div>
+
+                        <!-- 6. Ящик Богов -->
+                        <div class="case-tile" data-case="mythic">
+                            <span class="case-tier-tag">МИФИЧЕСКИЙ</span>
+                            <div class="case-img-wrap">
+                                <img src="assets/icons/case_mythic.svg" class="case-preview-img" alt="Ящик Богов">
+                            </div>
+                            <h4 class="case-name">Ящик Богов</h4>
+                            <div class="case-odds-preview">
+                                <span>55% Leg</span>
+                                <span>45% Mythic</span>
+                            </div>
+                            <button class="btn btn-inspect-trigger">
+                                <span>ОТКРЫТЬ</span>
+                                <span class="price-val">60 💎</span>
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Вкладка 2: Интерактив 1 из 3 Сфер -->
+                <div id="tab-spheres" class="tab-content">
+                    <div class="spheres-header-row">
+                        <div class="sphere-tiers-bar">
+                            <button class="sphere-tier-pill active" data-tier="mystery">ОБЫЧНЫЕ</button>
+                            <button class="sphere-tier-pill" data-tier="titan">ТИТАН</button>
+                            <button class="sphere-tier-pill" data-tier="void">БЕЗДНА</button>
+                        </div>
+                        <button id="btn-spheres-info" class="btn-info-icon" title="Содержимое сфер">?</button>
+                    </div>
+
+                    <div class="spheres-intro">
+                        <h3 id="spheres-tier-title">ТАЙНЫЕ СФЕРЫ</h3>
+                        <p id="spheres-hint">ВЫБЕРИ СТАВКУ И ЗАРЯДИ СФЕРЫ ДЛЯ ИГРЫ</p>
+                    </div>
+
+                    <div class="spheres-arena" id="spheres-arena">
+                        <div class="mystery-sphere" data-index="0">
+                            <div class="sphere-card-flipper">
+                                <div class="sphere-face sphere-face-front">
+                                    <img src="assets/icons/orb_mystery.svg" class="sphere-art" alt="Orb 1">
+                                </div>
+                                <div class="sphere-face sphere-face-back">
+                                    <div class="sphere-card-inner">
+                                        <canvas class="sphere-res-canvas" width="60" height="60"></canvas>
+                                        <div class="res-name">—</div>
+                                        <div class="res-rarity">COMMON</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mystery-sphere" data-index="1">
+                            <div class="sphere-card-flipper">
+                                <div class="sphere-face sphere-face-front">
+                                    <img src="assets/icons/orb_mystery.svg" class="sphere-art" alt="Orb 2">
+                                </div>
+                                <div class="sphere-face sphere-face-back">
+                                    <div class="sphere-card-inner">
+                                        <canvas class="sphere-res-canvas" width="60" height="60"></canvas>
+                                        <div class="res-name">—</div>
+                                        <div class="res-rarity">COMMON</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mystery-sphere" data-index="2">
+                            <div class="sphere-card-flipper">
+                                <div class="sphere-face sphere-face-front">
+                                    <img src="assets/icons/orb_mystery.svg" class="sphere-art" alt="Orb 3">
+                                </div>
+                                <div class="sphere-face sphere-face-back">
+                                    <div class="sphere-card-inner">
+                                        <canvas class="sphere-res-canvas" width="60" height="60"></canvas>
+                                        <div class="res-name">—</div>
+                                        <div class="res-rarity">COMMON</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Карточка с результатом выбора сферы -->
+                    <div id="spheres-outcome-banner" class="spheres-outcome-banner hidden">
+                        <div class="outcome-header">ТЫ ПОЛУЧИЛ:</div>
+                        <h3 id="outcome-ball-title">—</h3>
+                        <div id="outcome-duplicate-tag" class="duplicate-note hidden">+50 🪙 за дубликат</div>
+                        <button id="btn-collect-sphere-reward" class="btn outcome-claim-btn">
+                            <span>ЗАБРАТЬ В КОЛЛЕКЦИЮ</span>
+                        </button>
+                    </div>
+
+                    <div class="spheres-controls" id="spheres-buttons-bar">
+                        <button id="btn-start-spheres" class="btn btn-gacha-action btn-sphere-gold">
+                            <span id="btn-spheres-play-text">ИГРАТЬ (120 🪙)</span>
+                            <span id="btn-spheres-play-price" class="price-pill">120 🪙</span>
+                        </button>
+                        <button id="btn-start-spheres-ad" class="btn btn-gacha-action btn-sphere-ad">
+                            <span>БЕСПЛАТНО ЗА РЕКЛАМУ</span>
+                            <span class="price-pill">🎬 1 ПРОСМОТР</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Вкладка 3: Бесплатный Банк (Реклама) -->
+                <div id="tab-bank" class="tab-content">
+                    <div class="bank-intro">
+                        <h3>ХРАНИЛИЩЕ НАГРАД</h3>
+                        <p>Бесплатные ресурсы от спонсоров. Пополняй запасы монет и кристаллов.</p>
+                    </div>
+
+                    <div class="bank-cards-grid">
+                        <!-- Карточка 1: Золотой Запас -->
+                        <div class="bank-vault-card vault-gold">
+                            <div class="vault-badge badge-gold">ЗОЛОТО</div>
+                            <div class="vault-img-wrap">
+                                <img src="assets/icons/coins_bag.svg" class="vault-img" alt="Coins">
+                            </div>
+                            <div class="vault-info">
+                                <h3 class="vault-title">Мешок Монет</h3>
+                                <div class="vault-amount-tag">+200 🪙</div>
+                                <p class="vault-desc">Мгновенный запас золота для покупки кейсов и испытания сфер</p>
+                            </div>
+                            <button id="btn-ad-free-coins" class="btn bank-action-btn bank-gold-btn">
+                                <span>ПОЛУЧИТЬ +200 🪙</span>
+                                <span class="price-pill">🎬 СМОТРЕТЬ</span>
+                            </button>
+                        </div>
+
+                        <!-- Карточка 2: Алмазный Сейф -->
+                        <div class="bank-vault-card vault-gem">
+                            <div class="vault-badge badge-gem">АЛМАЗЫ</div>
+                            <div class="vault-img-wrap">
+                                <img src="assets/icons/gems_pile.svg" class="vault-img" alt="Gems">
+                            </div>
+                            <div class="vault-info">
+                                <h3 class="vault-title">Россыпь Алмазов</h3>
+                                <div class="vault-amount-tag">+15 💎</div>
+                                <p class="vault-desc">Кристаллы высшей пробы для открытия королевских сундуков</p>
+                            </div>
+                            <button id="btn-ad-free-gems" class="btn bank-action-btn bank-gem-btn">
+                                <span>ПОЛУЧИТЬ +15 💎</span>
+                                <span class="price-pill">🎬 СМОТРЕТЬ</span>
+                            </button>
+                        </div>
+
+                        <!-- Карточка 3: Мега-Контракт -->
+                        <div class="bank-vault-card vault-mega">
+                            <div class="vault-badge badge-mega">СУПЕР-ПАК</div>
+                            <div class="vault-img-wrap">
+                                <img src="assets/icons/case_royal.svg" class="vault-img" alt="Royal">
+                            </div>
+                            <div class="vault-info">
+                                <h3 class="vault-title">Двойной Куш</h3>
+                                <div class="vault-amount-tag">+350 🪙 & +10 💎</div>
+                                <p class="vault-desc">Специальный спонсорский бонус: золото и кристаллы сразу</p>
+                            </div>
+                            <button id="btn-ad-free-mega" class="btn bank-action-btn bank-mega-btn">
+                                <span>ЗАБРАТЬ ВСЁ</span>
+                                <span class="price-pill">🎬 СМОТРЕТЬ</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================== ЭКРАН ИНВЕНТАРЯ / КОЛЛЕКЦИИ =================== -->
+        <div id="screen-inventory" class="screen hidden">
+            <header class="menu-header">
+                <button id="btn-inventory-back" class="text-back-btn">← НАЗАД</button>
+                <div class="currencies-row">
+                    <div class="currency-pill">
+                        <img src="assets/icons/coins_bag.svg" class="currency-icon-img" alt="Coins">
+                        <span id="inventory-coins">150</span>
+                    </div>
+                    <div class="currency-pill">
+                        <img src="assets/icons/gems_pile.svg" class="currency-icon-img" alt="Gems">
+                        <span id="inventory-gems">50</span>
+                    </div>
+                </div>
+            </header>
+
+            <div class="inventory-scroll-content">
+                <!-- Сводка прогресса коллекции -->
+                <div class="inventory-summary-card">
+                    <div class="summary-info">
+                        <h3>ИНВЕНТАРЬ ШАРОВ</h3>
+                        <p id="inventory-ratio-text">ОТКРЫТО: 5 ИЗ 29 ШАРОВ</p>
+                    </div>
+                    <div class="collection-progress-bar">
+                        <div id="inventory-progress-fill" class="progress-fill" style="width: 18%;"></div>
+                    </div>
+                </div>
+
+                <!-- Боевая колода (3 шара на матч) -->
+                <div class="deck-section-title">
+                    <span>БОЕВАЯ КОЛОДА (5 ШАРОВ НА МАТЧ)</span>
+                    <span class="deck-hint">Нажми на шар ниже, чтобы экипировать</span>
+                </div>
+                <div class="inventory-deck-slots" id="inventory-deck-slots">
+                    <!-- Заполняется динамически: 3 слота боевой колоды -->
+                </div>
+
+                <!-- Фильтры по редкостям -->
+                <div class="inventory-filter-bar">
+                    <button class="inv-filter-pill active" data-rarity="ALL">ВСЕ</button>
+                    <button class="inv-filter-pill" data-rarity="COMMON">ОБЫЧНЫЕ</button>
+                    <button class="inv-filter-pill" data-rarity="RARE">РЕДКИЕ</button>
+                    <button class="inv-filter-pill" data-rarity="EPIC">ЭПИЧЕСКИЕ</button>
+                    <button class="inv-filter-pill" data-rarity="LEGENDARY">ЛЕГЕНДАРНЫЕ</button>
+                    <button class="inv-filter-pill" data-rarity="MYTHIC">МИФИЧЕСКИЕ</button>
+                    <button class="inv-filter-pill" data-rarity="TRANSCENDENT">ТРАНСЦЕНДЕНТ</button>
+                </div>
+
+                <!-- Сетка всех 29 шаров -->
+                <div class="inventory-grid" id="inventory-grid">
+                    <!-- Заполняется динамически: открытые и скрытые шары -->
+                </div>
+            </div>
+        </div>
+
+        <!-- =================== ЭКРАН МАГАЗИНА (ДОНАТ И ЭКСКЛЮЗИВЫ) =================== -->
+        <div id="screen-shop" class="screen hidden">
+            <header class="menu-header">
+                <button id="btn-shop-back" class="text-back-btn">← НАЗАД</button>
+                <div class="user-badge" id="shop-user-badge">
+                    <span class="rank-tag" id="shop-rank-tag">РАНГ I</span>
+                    <span class="vip-tag hidden" id="shop-vip-tag">VIP 👑</span>
+                </div>
+                <div class="currencies-row">
+                    <div class="currency-pill">
+                        <img src="assets/icons/coins_bag.svg" class="currency-icon-img" alt="Coins">
+                        <span id="shop-coins">150</span>
+                    </div>
+                    <div class="currency-pill">
+                        <img src="assets/icons/gems_pile.svg" class="currency-icon-img" alt="Gems">
+                        <span id="shop-gems">50</span>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Переключатель вкладок магазина -->
+            <div class="shop-tabs">
+                <button class="shop-tab-btn active" data-tab="shop-tab-offers">АКЦИИ</button>
+                <button class="shop-tab-btn" data-tab="shop-tab-cases">ДОНАТ-КЕЙСЫ</button>
+                <button class="shop-tab-btn" data-tab="shop-tab-gems">КРИСТАЛЛЫ</button>
+                <button class="shop-tab-btn" data-tab="shop-tab-gold">ОБМЕННИК</button>
+                <button class="shop-tab-btn" data-tab="shop-tab-daily">ШАР ДНЯ</button>
+            </div>
+
+            <div class="shop-scroll-content">
+                <!-- Вкладка 1: Акции и Наборы -->
+                <div id="shop-tab-offers" class="shop-tab-content active">
+                    <!-- Бесплатный ежедневный подарок -->
+                    <div class="shop-hero-card daily-gift-card">
+                        <div class="card-badge badge-free">ПОДАРОК ДНЯ</div>
+                        <div class="hero-card-body">
+                            <div class="hero-card-icon">
+                                <img src="assets/icons/gems_pile.svg" alt="Daily Gems" class="pulse-icon">
+                            </div>
+                            <div class="hero-card-info">
+                                <h3>Кристальный Рог</h3>
+                                <p>Забирай 15 💎 бесплатно каждые 24 часа!</p>
+                                <div id="daily-gift-timer" class="gift-timer-label hidden">Следующий через: <span id="daily-gift-countdown">23:59:59</span></div>
+                            </div>
+                            <button id="btn-claim-daily-gift" class="btn btn-shop-action btn-gift">
+                                <span>ЗАБРАТЬ 15 💎</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Стартер Пак -->
+                    <div class="shop-pack-card starter-pack" id="card-starter-pack">
+                        <div class="pack-badge badge-hot">ВЫГОДА +350%</div>
+                        <div class="pack-header-row">
+                            <div class="pack-title-col">
+                                <h3>СТАРТЕР ПАК БОЙЦА</h3>
+                                <span class="pack-subtitle">Единоразовое предложение для новичков</span>
+                            </div>
+                            <span class="pack-price-tag">99 Ян</span>
+                        </div>
+                        <div class="pack-rewards-grid">
+                            <div class="pack-reward-item">
+                                <img src="assets/icons/coins_bag.svg" alt="Coins">
+                                <strong>+600 🪙</strong>
+                                <span>Монеты</span>
+                            </div>
+                            <div class="pack-reward-item">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                                <strong>+120 💎</strong>
+                                <span>Кристаллы</span>
+                            </div>
+                            <div class="pack-reward-item epic-item">
+                                <canvas id="starter-ball-canvas" width="48" height="48"></canvas>
+                                <strong>Титан 🛡️</strong>
+                                <span class="rarity-sub">EPIC ШАР</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-shop-action btn-buy-pack" data-pack="starter" data-price="99 Ян" data-name="Стартер Пак Бойца">
+                            <span>КУПИТЬ ЗА 99 Ян</span>
+                        </button>
+                    </div>
+
+                    <!-- VIP Премиум Пропуск -->
+                    <div class="shop-pack-card vip-pack" id="card-vip-pack">
+                        <div class="pack-badge badge-vip">ПОСТОЯННЫЙ СТАТУС</div>
+                        <div class="pack-header-row">
+                            <div class="pack-title-col">
+                                <div class="vip-title-with-icon">
+                                    <img src="assets/icons/badge_vip.svg" class="vip-icon-mini" alt="VIP">
+                                    <h3>VIP БОЕВОЙ ПРОПУСК</h3>
+                                </div>
+                                <span class="pack-subtitle">Максимальные привилегии на весь аккаунт</span>
+                            </div>
+                            <span class="pack-price-tag">299 Ян</span>
+                        </div>
+                        <div class="vip-perks-list">
+                            <div class="vip-perk">✨ Золотая VIP-корона в профиле и меню</div>
+                            <div class="vip-perk">💰 <strong>+50% монет</strong> за победу в каждом бою арены навсегда</div>
+                            <div class="vip-perk">💎 <strong>+250 Кристаллов</strong> на баланс сразу</div>
+                            <div class="vip-perk">⭐ Эксклюзивный легендарный шар <strong>«Сюрикен»</strong> в коллекцию</div>
+                        </div>
+                        <button id="btn-buy-vip" class="btn btn-shop-action btn-vip" data-pack="vip" data-price="299 Ян" data-name="VIP Боевой Пропуск">
+                            <span id="btn-vip-text">АКТИВИРОВАТЬ VIP ЗА 299 Ян</span>
+                        </button>
+                    </div>
+
+                    <!-- Мега Набор Бездны -->
+                    <div class="shop-pack-card mythic-pack" id="card-abyss-pack">
+                        <div class="pack-badge badge-mythic">МИФИЧЕСКИЙ МЕГА-ПАК</div>
+                        <div class="pack-header-row">
+                            <div class="pack-title-col">
+                                <h3>ВЛАДЫКА БЕЗДНЫ</h3>
+                                <span class="pack-subtitle">Эксклюзивный арсенал высшей лиги</span>
+                            </div>
+                            <span class="pack-price-tag">599 Ян</span>
+                        </div>
+                        <div class="pack-rewards-grid">
+                            <div class="pack-reward-item">
+                                <img src="assets/icons/coins_bag.svg" alt="Coins">
+                                <strong>+3,000 🪙</strong>
+                                <span>Золото</span>
+                            </div>
+                            <div class="pack-reward-item">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                                <strong>+700 💎</strong>
+                                <span>Кристаллы</span>
+                            </div>
+                            <div class="pack-reward-item">
+                                <img src="assets/icons/case_void_black.svg" alt="Crate">
+                                <strong>1x Кейс</strong>
+                                <span class="rarity-sub">БЕЗДНА</span>
+                            </div>
+                            <div class="pack-reward-item mythic-item">
+                                <canvas id="abyss-ball-canvas" width="48" height="48"></canvas>
+                                <strong>Атом ☢️</strong>
+                                <span class="rarity-sub">MYTHIC ШАР</span>
+                            </div>
+                        </div>
+                        <button class="btn btn-shop-action btn-buy-pack" data-pack="abyss" data-price="599 Ян" data-name="Набор «Владыка Бездны»">
+                            <span>КУПИТЬ ЗА 599 Ян</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Вкладка 2: Донатные Кейсы -->
+                <div id="shop-tab-cases" class="shop-tab-content">
+                    <div class="shop-section-title">
+                        <h3>ЭКСКЛЮЗИВНЫЕ ДОНАТ-КЕЙСЫ</h3>
+                        <p>Особый пул наград: без обычных шаров, с повышенным шансом легендарок и джекпотов.</p>
+                    </div>
+                    <div class="donate-cases-grid">
+                        <!-- 1. Черный Кейс Бездны -->
+                        <div class="donate-case-card" data-donate-case="void_black">
+                            <div class="donate-badge">0% МУСОРА</div>
+                            <div class="donate-case-img-wrap">
+                                <img src="assets/icons/case_void_black.svg" class="donate-case-img" alt="Черный Кейс Бездны">
+                            </div>
+                            <h4>Черный Кейс Бездны</h4>
+                            <div class="donate-case-odds">
+                                <span>60% Legendary • 40% Mythic</span>
+                            </div>
+                            <p class="donate-case-desc">Только высший эшелон: Кракен, Фантом, Дракон, Атом, Зевс.</p>
+                            <div class="donate-case-actions">
+                                <button class="btn btn-shop-buy-case btn-yan" data-case-id="void_black" data-currency="yan" data-price="149 Ян">
+                                    <span>149 Ян</span>
+                                </button>
+                                <button class="btn btn-shop-buy-case btn-gems" data-case-id="void_black" data-currency="gems" data-price="90">
+                                    <span>90 💎</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 2. Неоновый Кибер-Бокс -->
+                        <div class="donate-case-card" data-donate-case="cyber">
+                            <div class="donate-badge">+500 🪙 БОНУС</div>
+                            <div class="donate-case-img-wrap">
+                                <img src="assets/icons/case_cyber.svg" class="donate-case-img" alt="Неоновый Кибер-Бокс">
+                            </div>
+                            <h4>Неоновый Кибер-Бокс</h4>
+                            <div class="donate-case-odds">
+                                <span>High-Tech Arsenal</span>
+                            </div>
+                            <p class="donate-case-desc">Техно-шары: Кибер, Лазер, Тесла, Киборг, Часовщик + 500 монет!</p>
+                            <div class="donate-case-actions">
+                                <button class="btn btn-shop-buy-case btn-yan" data-case-id="cyber" data-currency="yan" data-price="99 Ян">
+                                    <span>99 Ян</span>
+                                </button>
+                                <button class="btn btn-shop-buy-case btn-gems" data-case-id="cyber" data-currency="gems" data-price="60">
+                                    <span>60 💎</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 3. Сокровищница Дракона -->
+                        <div class="donate-case-card" data-donate-case="dragon">
+                            <div class="donate-badge">50 💎 КЕШБЭК</div>
+                            <div class="donate-case-img-wrap">
+                                <img src="assets/icons/case_dragon.svg" class="donate-case-img" alt="Сокровищница Дракона">
+                            </div>
+                            <h4>Сокровищница Дракона</h4>
+                            <div class="donate-case-odds">
+                                <span>Elemental Vault</span>
+                            </div>
+                            <p class="donate-case-desc">Огненная мощь: Дракон, Метеор, Огненный, Зевс + 1000 монет и 50 гемов кешбэк!</p>
+                            <div class="donate-case-actions">
+                                <button class="btn btn-shop-buy-case btn-yan" data-case-id="dragon" data-currency="yan" data-price="199 Ян">
+                                    <span>199 Ян</span>
+                                </button>
+                                <button class="btn btn-shop-buy-case btn-gems" data-case-id="dragon" data-currency="gems" data-price="120">
+                                    <span>120 💎</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- 4. Золотой Джекпот-Бокс -->
+                        <div class="donate-case-card" data-donate-case="jackpot">
+                            <div class="donate-badge">ДЖЕКПОТ 10 000 🪙</div>
+                            <div class="donate-case-img-wrap">
+                                <img src="assets/icons/case_jackpot.svg" class="donate-case-img" alt="Золотой Джекпот">
+                            </div>
+                            <h4>Золотой Джекпот</h4>
+                            <div class="donate-case-odds">
+                                <span>Шанс сорвать куш</span>
+                            </div>
+                            <p class="donate-case-desc">Куш 10,000 монет, 1,000 кристаллов или любой недостающий шар коллекции!</p>
+                            <div class="donate-case-actions">
+                                <button class="btn btn-shop-buy-case btn-yan" data-case-id="jackpot" data-currency="yan" data-price="49 Ян">
+                                    <span>49 Ян</span>
+                                </button>
+                                <button class="btn btn-shop-buy-case btn-gems" data-case-id="jackpot" data-currency="gems" data-price="30">
+                                    <span>30 💎</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка 3: Магазин Кристаллов -->
+                <div id="shop-tab-gems" class="shop-tab-content">
+                    <div class="shop-section-title">
+                        <h3>ПОПОЛНЕНИЕ КРИСТАЛЛОВ</h3>
+                        <p>Кристаллы нужны для покупки премиум кейсов, обмена на золото и покупки шара дня.</p>
+                    </div>
+                    <div class="gem-tiers-grid">
+                        <div class="gem-tier-card" data-gem-pack="tier1">
+                            <div class="gem-card-art">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                            </div>
+                            <div class="gem-amount">60 💎</div>
+                            <div class="gem-title">Горсть кристаллов</div>
+                            <button class="btn btn-buy-gems" data-gems="60" data-price="49 Ян" data-name="60 Кристаллов">49 Ян</button>
+                        </div>
+
+                        <div class="gem-tier-card featured" data-gem-pack="tier2">
+                            <div class="tier-card-badge">ХИТ</div>
+                            <div class="gem-card-art">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                            </div>
+                            <div class="gem-amount">200 💎</div>
+                            <div class="gem-bonus-tag">+20 в подарок!</div>
+                            <div class="gem-title">Мешочек кристаллов</div>
+                            <button class="btn btn-buy-gems" data-gems="200" data-price="129 Ян" data-name="200 Кристаллов">129 Ян</button>
+                        </div>
+
+                        <div class="gem-tier-card" data-gem-pack="tier3">
+                            <div class="tier-card-badge">+25% БОНУС</div>
+                            <div class="gem-card-art">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                            </div>
+                            <div class="gem-amount">630 💎</div>
+                            <div class="gem-bonus-tag">+80 в подарок!</div>
+                            <div class="gem-title">Сундук кристаллов</div>
+                            <button class="btn btn-buy-gems" data-gems="630" data-price="349 Ян" data-name="630 Кристаллов">349 Ян</button>
+                        </div>
+
+                        <div class="gem-tier-card best-value" data-gem-pack="tier4">
+                            <div class="tier-card-badge gold-badge">ЛУЧШАЯ ЦЕНА</div>
+                            <div class="gem-card-art">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                            </div>
+                            <div class="gem-amount">1,850 💎</div>
+                            <div class="gem-bonus-tag">+350 в подарок!</div>
+                            <div class="gem-title">Сокровищница титанов</div>
+                            <button class="btn btn-buy-gems" data-gems="1850" data-price="899 Ян" data-name="1,850 Кристаллов">899 Ян</button>
+                        </div>
+
+                        <div class="gem-tier-card maximum" data-gem-pack="tier5">
+                            <div class="tier-card-badge purple-badge">МАКСИМУМ +40%</div>
+                            <div class="gem-card-art">
+                                <img src="assets/icons/gems_pile.svg" alt="Gems">
+                            </div>
+                            <div class="gem-amount">5,200 💎</div>
+                            <div class="gem-bonus-tag">+1,200 в подарок!</div>
+                            <div class="gem-title">Императорский сейф</div>
+                            <button class="btn btn-buy-gems" data-gems="5200" data-price="1990 Ян" data-name="5,200 Кристаллов">1990 Ян</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка 4: Обменник Золота -->
+                <div id="shop-tab-gold" class="shop-tab-content">
+                    <div class="shop-section-title">
+                        <h3>ОБМЕН КРИСТАЛЛОВ НА ЗОЛОТО</h3>
+                        <p>Используй кристаллы, чтобы моментально получить золото для прокачки и открытия стандартных кейсов.</p>
+                    </div>
+                    <div class="gold-exchange-grid">
+                        <div class="gold-tier-card">
+                            <img src="assets/icons/coins_bag.svg" class="gold-icon-img" alt="Coins">
+                            <div class="gold-amount">600 🪙</div>
+                            <div class="gold-desc">Кошелек монет</div>
+                            <button class="btn btn-exchange-gold" data-cost="25" data-coins="600">25 💎</button>
+                        </div>
+
+                        <div class="gold-tier-card">
+                            <div class="gold-bonus-pill">+20% ВЫГОДА</div>
+                            <img src="assets/icons/coins_bag.svg" class="gold-icon-img" alt="Coins">
+                            <div class="gold-amount">1,800 🪙</div>
+                            <div class="gold-desc">Мешок золота</div>
+                            <button class="btn btn-exchange-gold" data-cost="65" data-coins="1800">65 💎</button>
+                        </div>
+
+                        <div class="gold-tier-card">
+                            <div class="gold-bonus-pill">+40% ВЫГОДА</div>
+                            <img src="assets/icons/chest_gold.svg" class="gold-icon-img" alt="Coins">
+                            <div class="gold-amount">5,000 🪙</div>
+                            <div class="gold-desc">Тележка сокровищ</div>
+                            <button class="btn btn-exchange-gold" data-cost="160" data-coins="5000">160 💎</button>
+                        </div>
+
+                        <div class="gold-tier-card best-gold">
+                            <div class="gold-bonus-pill gold-badge">+80% ВЫГОДА</div>
+                            <img src="assets/icons/chest_gold.svg" class="gold-icon-img" alt="Coins">
+                            <div class="gold-amount">15,000 🪙</div>
+                            <div class="gold-desc">Казна Королевства</div>
+                            <button class="btn btn-exchange-gold" data-cost="400" data-coins="15000">400 💎</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Вкладка 5: Шар Дня -->
+                <div id="shop-tab-daily" class="shop-tab-content">
+                    <div class="daily-ball-wrapper">
+                        <div class="daily-ball-header-row">
+                            <div class="daily-tag">ПРЕДЛОЖЕНИЕ ДНЯ</div>
+                            <div class="daily-rotation-timer">Смена через: <span id="daily-ball-countdown">14:15:30</span></div>
+                        </div>
+
+                        <div class="daily-ball-card" id="daily-ball-card">
+                            <div class="daily-card-top">
+                                <span class="csgo-rarity-pill" id="daily-ball-rarity">LEGENDARY</span>
+                                <span class="daily-discount-badge">-33% СКИДКА</span>
+                            </div>
+
+                            <div class="daily-ball-preview">
+                                <canvas id="daily-featured-ball-canvas" width="110" height="110"></canvas>
+                            </div>
+
+                            <h2 id="daily-ball-name">Фантом</h2>
+                            <p id="daily-ball-desc">Каждые 2.2 сек материализует спектрального клона, повторяющего удар через 0.18 сек (-5 HP).</p>
+
+                            <div class="daily-ball-price-row">
+                                <div class="price-old">180 💎</div>
+                                <div class="price-current">120 💎</div>
+                            </div>
+
+                            <button id="btn-buy-daily-ball" class="btn btn-action daily-buy-btn">
+                                <span id="btn-daily-ball-text">КУПИТЬ ЗА 120 💎</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- =================== ЕДИНАЯ МОДАЛКА КЕЙСА (ОСМОТР + РУЛЕТКА CS:GO) =================== -->
+        <div id="case-flow-modal" class="overlay hidden">
+            <div class="case-flow-box">
+
+                <!-- 1. РЕЖИМ ОСМОТРА СОДЕРЖИМОГО КЕЙСА -->
+                <div id="case-inspect-view" class="case-subview">
+                    <div class="inspect-top-bar">
+                        <div class="inspect-title-group">
+                            <span id="inspect-tier-tag" class="case-tier-tag">ОБЫЧНЫЙ</span>
+                            <h3 id="inspect-case-name">Железный Кейс</h3>
+                        </div>
+                        <button id="btn-close-inspect" class="csgo-close-btn">✕</button>
+                    </div>
+
+                    <div class="inspect-hero">
+                        <img id="inspect-case-img" src="assets/icons/case_iron.svg" class="inspect-big-img" alt="Case">
+                    </div>
+
+                    <div class="inspect-section-title">СОДЕРЖИМОЕ КЕЙСА:</div>
+                    <div id="inspect-drops-grid" class="inspect-drops-grid">
+                        <!-- Динамически заполняется шарами кейса -->
+                    </div>
+
+                    <div id="inspect-odds-bar" class="inspect-odds-bar">
+                        <!-- Динамические шансы дропа -->
+                    </div>
+
+                    <div class="inspect-actions-row" id="inspect-actions-row">
+                        <button id="btn-proceed-open-case" class="btn inspect-open-btn">
+                            <span id="inspect-btn-text">ОТКРЫТЬ КЕЙС</span>
+                            <span id="inspect-btn-price" class="price-val">80 🪙</span>
+                        </button>
+                        <button id="btn-proceed-open-donate-yan" class="btn inspect-open-btn hidden btn-yan-inspect">
+                            <span id="inspect-yan-text">КУПИТЬ ЗА</span>
+                            <span id="inspect-yan-price" class="price-val">149 Ян</span>
+                        </button>
+                        <button id="btn-cancel-inspect" class="btn inspect-close-btn">
+                            <span>ЗАКРЫТЬ</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 2. РЕЖИМ РУЛЕТКИ CS:GO -->
+                <div id="case-roulette-view" class="case-subview hidden">
+                    <div class="roulette-top-bar">
+                        <span id="roulette-case-name">ОТКРЫТИЕ...</span>
+                    </div>
+
+                    <div class="csgo-roulette-viewport">
+                        <div class="csgo-center-pointer"></div>
+                        <div id="csgo-roulette-strip" class="csgo-roulette-strip"></div>
+                    </div>
+                </div>
+
+                <!-- 3. РЕЖИМ ВЫПАВШЕГО ШАРА -->
+                <div id="case-winner-view" class="case-subview hidden">
+                    <canvas id="csgo-winner-canvas" width="100" height="100"></canvas>
+                    <div id="csgo-winner-rarity" class="csgo-rarity-pill">LEGENDARY</div>
+                    <h2 id="csgo-winner-name">Название Шара</h2>
+                    <p id="csgo-winner-desc">Описание способности</p>
+                    <div id="csgo-duplicate-tag" class="duplicate-note hidden">+50 🪙 за дубликат</div>
+
+                    <button id="btn-claim-case-ball" class="btn btn-action csgo-claim-btn">
+                        <span>ЗАБРАТЬ В КОЛЛЕКЦИЮ</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Модалка просмотра пулла шаров в сферах -->
+        <div id="spheres-pool-modal" class="overlay hidden">
+            <div class="case-flow-box pool-modal-box">
+                <div class="inspect-top-bar">
+                    <div class="inspect-title-group">
+                        <span id="pool-modal-tier-tag" class="case-tier-tag">ОБЫЧНЫЕ</span>
+                        <h3 id="pool-modal-title">Тайные Сферы</h3>
+                    </div>
+                    <button id="btn-close-spheres-pool" class="csgo-close-btn">✕</button>
+                </div>
+                <p class="pool-modal-subtitle">Возможные шары в этой категории сфер:</p>
+                <div id="spheres-pool-grid" class="inspect-drops-grid pool-grid">
+                    <!-- Динамически заполняется шарами -->
+                </div>
+                <button id="btn-done-spheres-pool" class="btn outcome-claim-btn" style="margin-top: 14px;">
+                    <span>ЗАКРЫТЬ</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Модалка детального просмотра шара (Инспектор) -->
+        <div id="modal-ball-detail" class="overlay hidden">
+            <div class="case-flow-box ball-detail-box">
+                <div class="inspect-top-bar">
+                    <span id="detail-rarity-pill" class="csgo-rarity-pill">LEGENDARY</span>
+                    <button id="btn-close-ball-detail" class="csgo-close-btn">✕</button>
+                </div>
+
+                <div class="detail-hero-section">
+                    <canvas id="detail-ball-canvas" width="96" height="96"></canvas>
+                    <h2 id="detail-ball-name">Тесла</h2>
+                    <div id="detail-deck-tag" class="detail-deck-badge hidden">В БОЕВОЙ КОЛОДЕ</div>
+                </div>
+
+                <!-- Характеристики шара с прогресс-барами -->
+                <div class="detail-stats-panel">
+                    <div class="detail-stat-row">
+                        <span class="dstat-label">🛡️ ЗДОРОВЬЕ</span>
+                        <div class="dstat-bar-track">
+                            <div id="detail-hp-bar" class="dstat-bar-fill dstat-hp" style="width: 100%;"></div>
+                        </div>
+                        <span id="detail-hp-val" class="dstat-val">100 HP</span>
+                    </div>
+
+                    <div class="detail-stat-row">
+                        <span class="dstat-label">⚔️ УРОН ТАРАНА</span>
+                        <div class="dstat-bar-track">
+                            <div id="detail-atk-bar" class="dstat-bar-fill dstat-atk" style="width: 65%;"></div>
+                        </div>
+                        <span id="detail-atk-val" class="dstat-val">18</span>
+                    </div>
+
+                    <div class="detail-stat-row">
+                        <span class="dstat-label">⚡ СКОРОСТЬ</span>
+                        <div class="dstat-bar-track">
+                            <div id="detail-spd-bar" class="dstat-bar-fill dstat-spd" style="width: 75%;"></div>
+                        </div>
+                        <span id="detail-spd-val" class="dstat-val">3.6</span>
+                    </div>
+
+                    <div class="detail-stat-row">
+                        <span class="dstat-label">⚖️ МАССА ШАРА</span>
+                        <div class="dstat-bar-track">
+                            <div id="detail-mass-bar" class="dstat-bar-fill dstat-mass" style="width: 55%;"></div>
+                        </div>
+                        <span id="detail-mass-val" class="dstat-val">1.2</span>
+                    </div>
+                </div>
+
+                <!-- Способность шара -->
+                <div class="detail-ability-panel">
+                    <div class="dability-header">
+                        <span class="dability-tag">СПОСОБНОСТЬ</span>
+                        <strong id="detail-ability-name">Электроразряд</strong>
+                    </div>
+                    <p id="detail-ability-desc">Каждые 2.4 сек бьет током врага на расстоянии (-16 HP).</p>
+                </div>
+
+                <!-- Живая интерактивная демонстрация способности (Live Preview) -->
+                <div class="detail-preview-panel">
+                    <div class="dpreview-top-bar">
+                        <div class="dpreview-badge">
+                            <span class="dpreview-pulse"></span>
+                            <span>LIVE ТЕСТ СПОСОБНОСТИ</span>
+                        </div>
+                        <button id="btn-replay-preview" class="btn-preview-replay" title="Перезапустить тест способности">
+                            ⟳ ТЕСТ
+                        </button>
+                    </div>
+                    <div class="dpreview-arena-box">
+                        <canvas id="detail-preview-canvas" width="340" height="140"></canvas>
+                    </div>
+                    <div id="detail-preview-status" class="dpreview-status-text">⚔️ Подготовка: Запуск шара...</div>
+                </div>
+
+                <!-- Кнопки экипировки в слоты -->
+                <div class="detail-actions" id="detail-unlocked-actions">
+                    <div class="equip-prompt">ВЗЯТЬ В БОЙ (ВЫБЕРИ СЛОТ):</div>
+                    <div class="equip-slots-row">
+                        <button class="btn btn-equip-slot" data-slot="0">СЛОТ 1</button>
+                        <button class="btn btn-equip-slot" data-slot="1">СЛОТ 2</button>
+                        <button class="btn btn-equip-slot" data-slot="2">СЛОТ 3</button>
+                        <button class="btn btn-equip-slot" data-slot="3">СЛОТ 4</button>
+                        <button class="btn btn-equip-slot" data-slot="4">СЛОТ 5</button>
+                    </div>
+                </div>
+
+                <!-- Кнопка перехода в сундуки для заблокированного шара -->
+                <div class="detail-actions hidden" id="detail-locked-actions">
+                    <button id="btn-goto-chests-from-detail" class="btn btn-action outcome-claim-btn">
+                        <span>ОТКРЫТЬ В СУНДУКАХ / СФЕРАХ</span>
+                        <span class="btn-arrow">→</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Модалка оформления покупки (Яндекс Игры) -->
+        <div id="shop-checkout-modal" class="overlay hidden">
+            <div class="checkout-box">
+                <div class="checkout-header">
+                    <span class="modal-label">ЯНДЕКС ИГРЫ • ОПЛАТА</span>
+                    <button id="btn-close-checkout" class="csgo-close-btn">✕</button>
+                </div>
+
+                <div class="checkout-item-preview">
+                    <div id="checkout-item-icon" class="checkout-icon-wrap">
+                        <img src="assets/icons/gems_pile.svg" alt="Item">
+                    </div>
+                    <div class="checkout-item-info">
+                        <h3 id="checkout-item-name">200 Кристаллов</h3>
+                        <div id="checkout-item-desc" class="checkout-desc">Пополнение баланса аккаунта</div>
+                        <div id="checkout-item-price" class="checkout-price-tag">129 Ян</div>
+                    </div>
+                </div>
+
+                <div class="yandex-checkout-notice">
+                    <div class="yandex-icon-pill">ЯНДЕКС</div>
+                    <div class="yandex-notice-text">
+                        <strong>Оплата в валюте Яндекс Игр (Яны)</strong>
+                        <span>Транзакция защищена платежным шлюзом платформы</span>
+                    </div>
+                </div>
+
+                <div class="checkout-status-area hidden" id="checkout-status-area">
+                    <div class="checkout-spinner"></div>
+                    <div id="checkout-status-text">Соединение с Яндекс Играми...</div>
+                </div>
+
+                <div class="checkout-actions" id="checkout-actions-row">
+                    <button id="btn-confirm-payment" class="btn btn-action checkout-pay-btn">
+                        <span>ОПЛАТИТЬ <span id="checkout-btn-price">129 Ян</span></span>
+                    </button>
+                    <button id="btn-cancel-checkout" class="btn btn-secondary">ОТМЕНА</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Модалка успешной покупки -->
+        <div id="shop-success-modal" class="overlay hidden">
+            <div class="success-box">
+                <div class="success-icon-badge">✓</div>
+                <h2 id="success-modal-title">ПОКУПКА УСПЕШНА!</h2>
+                <p id="success-modal-desc">На ваш аккаунт успешно зачислено: +200 💎</p>
+                <button id="btn-close-success" class="btn btn-action csgo-claim-btn">ОТЛИЧНО!</button>
+            </div>
+        </div>
+
+        <!-- Симуляция просмотра рекламы -->
+        <div id="ad-simulation-modal" class="overlay hidden">
+            <div class="ad-box">
+                <div class="ad-spinner"></div>
+                <h3>СМОТРИМ РЕКЛАМУ...</h3>
+                <p>Награда будет начислена через <span id="ad-timer-num">2</span> сек</p>
+            </div>
+        </div>
+
+    </div>
+
+    
+        <!-- Модалка Тестового Режима (Песочница: Визуальный выбор шаров) -->
+        <div id="sandbox-modal" class="modal-overlay hidden" style="position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 12px;">
+            <div class="sandbox-modal-container">
+                <!-- Заголовок -->
+                <div class="sandbox-modal-header">
+                    <div class="sandbox-title-wrap">
+                        <span class="sandbox-title-icon">🧪</span>
+                        <span class="sandbox-title-text">ТЕСТОВЫЙ БОЙ (ПЕСОЧНИЦА)</span>
+                    </div>
+                    <button id="btn-close-sandbox" class="sandbox-close-btn">✕</button>
+                </div>
+
+                <!-- Основной скроллируемый контент -->
+                <div class="sandbox-modal-body">
+                    <!-- Верхняя карточка дуэли: Игрок VS Бот -->
+                    <div class="sandbox-vs-container">
+                        <!-- Слот Игрока -->
+                        <div id="sandbox-slot-player" class="sandbox-vs-slot active-player">
+                            <div class="sandbox-slot-tag player-tag">🔵 ИГРОК</div>
+                            <div class="sandbox-preview-wrap">
+                                <canvas id="sandbox-player-canvas" width="60" height="60"></canvas>
+                            </div>
+                            <div id="sandbox-player-name" class="sandbox-slot-name">Метеор</div>
+                            <div id="sandbox-player-rarity" class="sandbox-slot-rarity" style="color: #ec4899;">EPIC</div>
+                            <div id="sandbox-player-stats" class="sandbox-slot-stats">HP 110 | АТК 18 | СК 1.15</div>
+                            <div class="sandbox-slot-hint">ВЫБИРАЕМ...</div>
+                        </div>
+
+                        <!-- VS разделитель -->
+                        <div class="sandbox-vs-divider">
+                            <span class="vs-text">⚡ VS ⚡</span>
+                        </div>
+
+                        <!-- Слот Бота -->
+                        <div id="sandbox-slot-bot" class="sandbox-vs-slot">
+                            <div class="sandbox-slot-tag bot-tag">🔴 БОТ</div>
+                            <div class="sandbox-preview-wrap">
+                                <canvas id="sandbox-bot-canvas" width="60" height="60"></canvas>
+                            </div>
+                            <div id="sandbox-bot-name" class="sandbox-slot-name">Вампир</div>
+                            <div id="sandbox-bot-rarity" class="sandbox-slot-rarity" style="color: #3b82f6;">RARE</div>
+                            <div id="sandbox-bot-stats" class="sandbox-slot-stats">HP 95 | АТК 12 | СК 0.95</div>
+                            <div class="sandbox-slot-hint">НАЖМИ ДЛЯ ВЫБОРА</div>
+                        </div>
+                    </div>
+
+                    <!-- Табы выбора стороны -->
+                    <div class="sandbox-pick-tabs">
+                        <button id="sandbox-tab-player" class="sandbox-tab-btn active-player" data-slot="player">
+                            <span>🔵 ВЫБОР ДЛЯ ИГРОКА</span>
+                        </button>
+                        <button id="sandbox-tab-bot" class="sandbox-tab-btn" data-slot="bot">
+                            <span>🔴 ВЫБОР ДЛЯ БОТА</span>
+                        </button>
+                    </div>
+
+                    <!-- Фильтры редкостей как в инвентаре -->
+                    <div class="sandbox-filter-bar" id="sandbox-filter-bar">
+                        <button class="sandbox-filter-pill active" data-rarity="ALL">ВСЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="COMMON">ОБЫЧНЫЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="RARE">РЕДКИЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="EPIC">ЭПИЧЕСКИЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="LEGENDARY">ЛЕГЕНДАРНЫЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="MYTHIC">МИФИЧЕСКИЕ</button>
+                        <button class="sandbox-filter-pill" data-rarity="TRANSCENDENT">ТРАНСЦЕНДЕНТ</button>
+                    </div>
+
+                    <!-- Сетка всех 29 шаров (как в инвентаре) -->
+                    <div class="sandbox-grid-scroll">
+                        <div id="sandbox-balls-grid" class="sandbox-balls-grid">
+                            <!-- Карточки шаров генерируются динамически -->
+                        </div>
+                    </div>
+
+                    <!-- Описание способности выбранного шара -->
+                    <div class="sandbox-ability-card">
+                        <div class="sandbox-ability-header">
+                            <span id="sandbox-ability-name" class="ability-title">Способность шара</span>
+                        </div>
+                        <div id="sandbox-ability-desc" class="ability-text">Описание эффектов и механик</div>
+                    </div>
+                </div>
+
+                <!-- Футер: Кнопка запуска боя -->
+                <div class="sandbox-modal-footer">
+                    <button id="btn-start-sandbox" class="sandbox-start-btn">
+                        <span>⚔️ НАЧАТЬ ТЕСТОВЫЙ БОЙ</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    <!-- Скрипты -->
+    <script src="js/audio.js"></script>
+    <script src="js/physics.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/balls.js"></script>
+    <script src="js/preview.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

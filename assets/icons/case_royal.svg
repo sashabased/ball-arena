@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <!-- 5. КОРОЛЕВСКИЙ СУНДУК: Королевский ларец с золотым окладом и драгоценным камнем -->
+  <rect x="18" y="46" width="84" height="54" rx="6" fill="#1c1608" stroke="#d97706" stroke-width="2"/>
+  
+  <!-- Арочная выпуклая крышка -->
+  <path d="M14 46 Q60 18 106 46 Z" fill="#291f0a" stroke="#f59e0b" stroke-width="2.5"/>
+  <path d="M26 46 Q60 26 94 46 Z" fill="none" stroke="#d97706" stroke-width="1.5" opacity="0.6"/>
+
+  <!-- Золотые угловые филигранные уголки -->
+  <polygon points="18,46 32,46 18,60" fill="#f59e0b"/>
+  <polygon points="102,46 88,46 102,60" fill="#f59e0b"/>
+  <polygon points="18,100 32,100 18,86" fill="#f59e0b"/>
+  <polygon points="102,100 88,100 102,86" fill="#f59e0b"/>
+
+  <!-- Горизонтальная золотая балка -->
+  <rect x="16" y="44" width="88" height="4" fill="#fbbf24"/>
+
+  <!-- Центральный золотой медальон с ограненным рубином -->
+  <circle cx="60" cy="54" r="11" fill="#78350f" stroke="#fbbf24" stroke-width="2"/>
+  <polygon points="60,47 67,54 60,61 53,54" fill="#ef4444"/>
+</svg>

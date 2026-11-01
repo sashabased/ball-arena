@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="100%" height="100%">
+  <!-- ЧЕРНЫЙ КЕЙС БЕЗДНЫ (Dark Luxury Void Case) -->
+  <defs>
+    <radialGradient id="voidGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#c084fc" stop-opacity="0.8"/>
+      <stop offset="60%" stop-color="#581c87" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Внешний ореол бездны -->
+  <circle cx="60" cy="62" r="50" fill="url(#voidGlow)"/>
+
+  <!-- Внешний восьмигранный титановый корпус -->
+  <polygon points="36,16 84,16 110,42 110,92 84,108 36,108 10,92 10,42" fill="#090514" stroke="#a855f7" stroke-width="2.5"/>
+  
+  <!-- Внутренний фасетный обод -->
+  <polygon points="40,22 80,22 102,44 102,86 80,100 40,100 18,86 18,44" fill="#0f0721" stroke="#6b21a8" stroke-width="1.5"/>
+
+  <!-- Центральное око бездны -->
+  <polygon points="60,32 86,62 60,92 34,62" fill="#1e0a3d" stroke="#c084fc" stroke-width="2"/>
+  <circle cx="60" cy="62" r="14" fill="#3b0764" stroke="#e9d5ff" stroke-width="1"/>
+  <circle cx="60" cy="62" r="8" fill="#a855f7"/>
+  <circle cx="60" cy="62" r="3.5" fill="#ffffff"/>
+
+  <!-- Щупальца-лучи энергии -->
+  <path d="M18,44 Q38,50 34,62" stroke="#a855f7" stroke-width="1.8" fill="none"/>
+  <path d="M102,44 Q82,50 86,62" stroke="#a855f7" stroke-width="1.8" fill="none"/>
+  <path d="M18,86 Q38,74 34,62" stroke="#a855f7" stroke-width="1.8" fill="none"/>
+  <path d="M102,86 Q82,74 86,62" stroke="#a855f7" stroke-width="1.8" fill="none"/>
+</svg>
